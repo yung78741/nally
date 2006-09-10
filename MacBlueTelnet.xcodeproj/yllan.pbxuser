@@ -1,9 +1,17 @@
 // !$*UTF8*$!
 {
+	089C165DFE840E0CC02AAC07 /* English */ = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{1062, -118}, {1035, 860}}";
+		};
+	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
 		activeBuildConfigurationName = Debug;
 		activeExecutable = 850396280A391C8400B12A01 /* MacBlueTelnet */;
 		activeTarget = 8D1107260486CEB800E47090 /* MacBlueTelnet */;
+		addToTargets = (
+			8D1107260486CEB800E47090 /* MacBlueTelnet */,
+		);
 		codeSenseManager = 850396370A391C8F00B12A01 /* Code sense */;
 		executables = (
 			850396280A391C8400B12A01 /* MacBlueTelnet */,
@@ -14,7 +22,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					243,
+					314,
 					20,
 					48,
 					43,
@@ -53,7 +61,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					20,
-					219,
+					290,
 					20,
 					48,
 					43,
@@ -71,8 +79,8 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 171515012;
-			PBXWorkspaceStateSaveDate = 171515012;
+			PBXPerProjectTemplateStateSaveDate = 179568230;
+			PBXWorkspaceStateSaveDate = 179568230;
 		};
 		sourceControlManager = 850396360A391C8F00B12A01 /* Source Control */;
 		userBuildSettings = {
@@ -114,10 +122,62 @@
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
 	};
+	85145A9F0AB40053009FC710 /* YLTelnet.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 378}}";
+			sepNavSelRange = "{106, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 186}}";
+		};
+	};
+	85145AA00AB40053009FC710 /* YLTelnet.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 537}}";
+			sepNavSelRange = "{106, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 537}}";
+		};
+	};
+	85145AAC0AB40192009FC710 /* YLTerminal.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 537}}";
+			sepNavSelRange = "{159, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 537}}";
+		};
+	};
+	85145AAD0AB40192009FC710 /* YLTerminal.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 537}}";
+			sepNavSelRange = "{108, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 537}}";
+		};
+	};
+	8570AD5D0A3923A900838442 /* YLView.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 537}}";
+			sepNavSelRange = "{103, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 537}}";
+			sepNavWindowFrame = "{{15, 3}, {930, 738}}";
+		};
+	};
+	8570AD5E0A3923A900838442 /* YLView.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {512, 537}}";
+			sepNavSelRange = "{103, 0}";
+			sepNavVisRect = "{{0, 0}, {512, 537}}";
+			sepNavWindowFrame = "{{15, 3}, {930, 738}}";
+		};
+	};
 	8D1107260486CEB800E47090 /* MacBlueTelnet */ = {
 		activeExec = 0;
 		executables = (
 			850396280A391C8400B12A01 /* MacBlueTelnet */,
 		);
+	};
+	8D1107310486CEB800E47090 /* Info.plist */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {996, 787}}";
+			sepNavSelRange = "{745, 0}";
+			sepNavVisRect = "{{0, 0}, {996, 787}}";
+			sepNavWindowFrame = "{{1039, -97}, {1035, 860}}";
+		};
 	};
 }
