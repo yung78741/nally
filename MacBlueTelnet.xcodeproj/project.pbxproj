@@ -215,7 +215,8 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
+				INSTALL_PATH = /Applications;
+				OTHER_CFLAGS = "-D__DUMPPACKET__";
 				PRODUCT_NAME = MacBlueTelnet;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
