@@ -246,7 +246,8 @@ static const struct Opt *const opts[] = {
 }
 
 /* return YES if successful, NO otherwise. */
-- (BOOL) connectToAddress: (NSString *) addr port: (unsigned int) port;
+- (BOOL) connectToAddress: (NSString *) addr port: (unsigned int) port ;
+- (BOOL) connectToIP: (NSString *) ip port: (unsigned int) port ;
 
 /* return the last error message. */
 - (NSString *) lastError;

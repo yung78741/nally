@@ -12,6 +12,8 @@
 #import <sys/socket.h>
 #import <netinet/in.h>
 #import <arpa/inet.h>
+#import <stdlib.h>
+#import <netdb.h>
 
 
 #ifdef __DUMPPACKET__
@@ -33,9 +35,19 @@ void dump_packet(unsigned char *s, int length) {
 
 @implementation YLTelnet
 
-- (BOOL) connectToAddress: (NSString *) addr port: (unsigned int) port{
+- (BOOL) connectToAddress: (NSString *) addr port: (unsigned int) port {
+	struct hostent *hostinfo;
 	
-	return YES;
+	hostinfo = gethostbyname2([addr UTF8String], AF_INET);
+
+	if (hostinfo == NULL) {
+		// can't resolve host
+		NSLog(@"cannot resolve host");
+	}
+	
+	NSString *ip_address = [NSString stringWithUTF8String: hostinfo->h_addr];
+
+	return [self connectToIP: ip_address port: port];
 }
 
 - (BOOL) connectToIP: (NSString *) ip port: (unsigned int) port {
@@ -186,7 +198,6 @@ void dump_packet(unsigned char *s, int length) {
 	switch (_sbOption) {
 		case TELOPT_TSPEED:
 			if ([_sbBuffer length] == 1 && buf[0] == TELQUAL_SEND) {
-				char *logbuf;
 				b[0] = IAC;
 				b[1] = SB;
 				b[2] = TELOPT_TSPEED;
@@ -195,10 +206,68 @@ void dump_packet(unsigned char *s, int length) {
 				b[n] = IAC;
 				b[n + 1] = SE;
 				[self sendBytes: b length: n + 2];
-				
+				NSLog(@"server:\tSB TSPEED SEND");
+				NSLog(@"client:\tSB TSPEED IS %s", "19200");
+			} else 
+				NSLog(@"server:\tSB TSPEED <something weird>");
+			break;
+		case TELOPT_TTYPE:
+			if ([_sbBuffer length] == 1 && buf[0] == TELQUAL_SEND) {
+				b[0] = IAC;
+				b[1] = SB;
+				b[2] = TELOPT_TTYPE;
+				b[3] = TELQUAL_IS;
+				// TODO: fill in terminal type (uppercase)
+				b[n + 4] = IAC;
+				b[n + 5] = SE;
+				[self sendBytes: b length: n + 6];
+			} else
+				NSLog(@"server:\tSB TTYPE <something weird>");
+			break;
+		case TELOPT_OLD_ENVIRON:
+		case TELOPT_NEW_ENVIRON:
+			p = buf;
+			q = p + [_sbBuffer length];
+			if (p < q && *p == TELQUAL_SEND) {
+				p++;
+				if (_sbOption == TELOPT_OLD_ENVIRON) {
+					if (1/* TODO: config */) {
+						value = RFC_VALUE;
+						var = RFC_VAR;
+					} else {
+						value = BSD_VALUE;
+						var = BSD_VAR;
+					}
+
+					/*
+					 * Try to guess the sense of VAR and VALUE.
+					 */
+					while (p < q) {
+						if (*p == RFC_VAR) {
+							value = RFC_VALUE;
+							var = RFC_VAR;
+						} else if (*p == BSD_VAR) {
+							value = BSD_VALUE;
+							var = BSD_VAR;
+						}
+						p++;
+					}
+				} else {
+					/*
+					 * With NEW_ENVIRON, the sense of VAR and VALUE
+					 * isn't in doubt.
+					 */
+					value = RFC_VALUE;
+					var = RFC_VAR;
+				}
+				b[0] = IAC;
+				b[1] = SB;
+				b[2] = _sbOption;
+				b[3] = TELQUAL_IS;
+				// TODO: get the information, fill in.
 			}
+			break;			
 	}
-	
 }
 
 
@@ -300,11 +369,11 @@ void dump_packet(unsigned char *s, int length) {
 }
 
 - (void) sendBytes: (unsigned char *) _msg length: (unsigned int) length {
-	
+	[_server writeData: [NSData dataWithBytes: _msg length: length]];
 }
 
 - (void) sendMessage: (NSData *) _msg {
-	
+	[_server writeData: _msg];
 }
 
 

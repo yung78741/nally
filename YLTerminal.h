@@ -8,9 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-
-@interface YLTerminal : NSObject {
-
+@interface YLTerminal : NSObject {	
+	int row;
+	int column;
+	
 }
+
+
 
 @end
