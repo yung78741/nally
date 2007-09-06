@@ -43,6 +43,7 @@ void dump_packet(unsigned char *s, int length) {
 	if (hostinfo == NULL) {
 		// can't resolve host
 		NSLog(@"cannot resolve host");
+		return NO;
 	}
 	
 	NSString *ip_address = [NSString stringWithUTF8String: hostinfo->h_addr];
@@ -192,7 +193,7 @@ void dump_packet(unsigned char *s, int length) {
 - (void) processSubnegotiation {
 	unsigned char b[2048], *p, *q;
 	int var, value, n;
-	char *e;
+//	char *e;
 	const char *buf = [_sbBuffer bytes];
 	
 	switch (_sbOption) {
@@ -226,7 +227,7 @@ void dump_packet(unsigned char *s, int length) {
 			break;
 		case TELOPT_OLD_ENVIRON:
 		case TELOPT_NEW_ENVIRON:
-			p = buf;
+			p = (unsigned char *) buf;
 			q = p + [_sbBuffer length];
 			if (p < q && *p == TELQUAL_SEND) {
 				p++;

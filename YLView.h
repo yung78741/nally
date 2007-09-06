@@ -10,7 +10,13 @@
 
 
 @interface YLView : NSView {
-
+	NSColor *bgColor;
+	NSColor *fgColor;
+	
+	int fontWidth;
+	int fontHeight;
+	
+	id _dataSource;
 }
 
 @end
