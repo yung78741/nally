@@ -1,6 +1,12 @@
 {
     IBClasses = (
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            CLASS = YLController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {"_telnetView" = id; }; 
+            SUPERCLASS = NSObject; 
+        }, 
         {CLASS = YLView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
     ); 
     IBVersion = 1; 

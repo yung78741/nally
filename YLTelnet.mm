@@ -46,8 +46,9 @@ void dump_packet(unsigned char *s, int length) {
 		return NO;
 	}
 	
-	NSString *ip_address = [NSString stringWithUTF8String: hostinfo->h_addr];
-
+	unsigned char *addr_ptr = (unsigned char *)hostinfo->h_addr;
+	NSString *ip_address = [NSString stringWithFormat: @"%d.%d.%d.%d", addr_ptr[0], addr_ptr[1], addr_ptr[2], addr_ptr[3]];
+	
 	return [self connectToIP: ip_address port: port];
 }
 
@@ -67,6 +68,7 @@ void dump_packet(unsigned char *s, int length) {
 	
 	if ( connect( sockfd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0 ) {
 		// set error code
+		NSLog(@"cannot connect");
 		return NO;
 	}
 

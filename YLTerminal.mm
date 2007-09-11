@@ -70,10 +70,21 @@ static SEL normal_table[256];
 		_cursorX = 0;
 		_cursorY = 0;
 		_grid = (cell *) malloc(sizeof(cell) * (_row * _column));
+		int i;
+		for (i = 0; i < (_row * _column); i++) {
+			_grid[i].fgColor = 7;
+			_grid[i].bgColor = 9;
+			_grid[i].byte = 0;
+			_grid[i].bold = 0;
+			_grid[i].underline = 0;
+			_grid[i].blink = 0;
+			_grid[i].reverse = 0;
+		}
 		_csBuf = new std::deque<unsigned char>();
 		_csArg = new std::deque<int>();
 		_fgColor = 7;
 		_bgColor = 9;
+		_state = TP_NORMAL;
 	}
 	return self;
 }
@@ -97,13 +108,14 @@ static SEL normal_table[256];
 
 - (void) feedBytes: (const unsigned char *) bytes length: (int) len {
 	int i, x;
+//	NSLog(@"feed %d", len);
 	unsigned char c;
 	for (i = 0; i < len; i++) {
 		c = bytes[i];
 		if (_state == TP_NORMAL) {
 			if (c == 0x07) { // Beep
 				NSBeep();
-			} else if (c = 0x08) { // Backspace
+			} else if (c == 0x08) { // Backspace
 				if (_cursorX > 0)
 					_cursorX--;
 			} else if (c == 0x0A) { // Linefeed 
@@ -123,6 +135,7 @@ static SEL normal_table[256];
 				_csTemp = 0;
 				_state = TP_CONTROL;
 			} else {
+//				NSLog(@"insert %d @ %d %d", c, _cursorX, _cursorY);
 				GRID(_cursorX, _cursorY).byte = c;
 				GRID(_cursorX, _cursorY).fgColor = _fgColor;
 				GRID(_cursorX, _cursorY).bgColor = _bgColor;
@@ -130,6 +143,7 @@ static SEL normal_table[256];
 				GRID(_cursorX, _cursorY).underline = _underline;
 				GRID(_cursorX, _cursorY).blink = _blink;
 				GRID(_cursorX, _cursorY).reverse = _reverse;
+				_cursorX++;
 			}
 		} else if (_state == TP_ESCAPE) {
 			if (c == 0x5B) { // 0x5B == '['
@@ -137,6 +151,8 @@ static SEL normal_table[256];
 				_csArg->clear();
 				_csTemp = 0;
 				_state = TP_CONTROL;
+			} else {
+				_state = TP_NORMAL;
 			}
 		} else if (_state == TP_CONTROL) {
 			if (isParameter(c)) {
@@ -214,6 +230,7 @@ static SEL normal_table[256];
 					for (idx = start; idx <= end; idx++) {
 						int memIdx = (idx + _offset * _column) % (_row * _column);
 						_grid[memIdx].byte = '\0';
+						_grid[memIdx].bgColor = 9;
 					}
 				} else if (c == 'K') {		// Erase Line (cursor does not move)
 					/* 
@@ -229,6 +246,7 @@ static SEL normal_table[256];
 					int idx;
 					for (idx = start; idx <= end; idx++) {
 						GRID(idx, _cursorY).byte = '\0';
+						GRID(idx, _cursorY).bgColor = 9;
 					}
 				} else if (c == 'L') {
 				} else if (c == 'M') {
@@ -272,9 +290,11 @@ static SEL normal_table[256];
 					
 				}
 				_csArg->clear();
+				_state = TP_NORMAL;
 			}
 		}
 	}
+	[_delegate setNeedsDisplay: YES];
 }
 
 # pragma mark -
@@ -292,6 +312,10 @@ static SEL normal_table[256];
 	return [[YLLGlobalConfig sharedInstance] colorAtIndex: GRID(c, r).bgColor hilite: NO];	
 }
 
+- (BOOL) boldAtRow:(int) r column:(int) c {
+	return GRID(c, r).bold;
+}
+
 - (int) fgColorIndexAtRow: (int) r column: (int) c {
 	return GRID(c, r).fgColor;
 }
@@ -303,10 +327,14 @@ static SEL normal_table[256];
 
 - (unichar) charAtRow: (int) r column: (int) c {
 	int db = [self isDoubleByteAtRow: r column: c];
-	if (db == 0) 
-		return (unichar) GRID(c, r).byte;
-	if (db == 1)
-		return B2U[((int)GRID(c, r).byte << 8) + GRID(c, r+1).byte - 0x8000];
+	if (db == 0) {
+		unichar b = GRID(c, r).byte;
+			return b;
+	}
+	if (db == 1) {
+		int index = ((int)GRID(c, r).byte << 8) + GRID(c+1, r).byte - 0x8000;
+		return B2U[index];
+	}
 	return 0;
 }
 
@@ -316,13 +344,12 @@ static SEL normal_table[256];
 	if (c == _column - 1) return 0;
 	for (i = 0; i <= c; i++) {
 		unsigned char c = GRID(i, r).byte;
-		if (db == 0) {
+		if (db == 0 || db == 2) {
 			if (c > 0x7F) db = 1;
+			else db = 0;
 		} else if (db == 1) {
 			db = 2;
-		} else {
-			db = 0;
-		}
+		} 
 	}
 	return db;
 }

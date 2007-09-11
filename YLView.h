@@ -20,5 +20,11 @@
 }
 
 - (void) drawCellAtRow: (int) r column: (int) c;
+- (void) drawString: (NSString *) str atPoint: (NSPoint) origin withAttributes: (NSDictionary *) attribute unichar: (unichar) ch color: (NSColor *) color;
+
+- (id)dataSource;
+- (void)setDataSource:(id)value;
+
+
 
 @end

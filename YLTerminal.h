@@ -55,6 +55,7 @@ typedef enum {C0, INTERMEDIATE, ALPHABETIC, DELETE, C1, G1, SPECIAL, ERROR} ASCI
 - (BOOL) isDirtyAtRow: (int) r column:(int) c;
 - (NSColor *) fgColorAtRow: (int) r column: (int) c;
 - (NSColor *) bgColorAtRow: (int) r column: (int) c;
+- (BOOL) boldAtRow:(int) r column:(int) c ;
 - (unichar) charAtRow: (int) r column: (int) c;
 - (int) isDoubleByteAtRow: (int) r column:(int) c;
 

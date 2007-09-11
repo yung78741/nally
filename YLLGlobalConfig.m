@@ -20,12 +20,12 @@ static YLLGlobalConfig *sSharedInstance;
 		[self release];
 	} else if(self = sSharedInstance = [[super init] retain]) {
 		/* init code */
-		_row = 80;
-		_column = 24;
+		_row = 24;
+		_column = 80;
 		_cellWidth = 12;
 		_cellHeight = 24;
-		[self setEFont: [NSFont fontWithName: @"Monaco" size: 20]];
-		[self setCFont: [NSFont fontWithName: @"LiSong Pro" size: 20]];
+		[self setEFont: [NSFont fontWithName: @"Monaco" size: 18]];
+		[self setCFont: [NSFont fontWithName: @"LiHei Pro" size: 22]];
 		_colorTable[0][0] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][0] = [[NSColor colorWithDeviceRed: 0.25 green: 0.25 blue: 0.25 alpha: 1.0] retain];
 		_colorTable[0][1] = [[NSColor colorWithDeviceRed: 0.50 green: 0.00 blue: 0.00 alpha: 1.0] retain];
@@ -36,7 +36,7 @@ static YLLGlobalConfig *sSharedInstance;
 		_colorTable[1][3] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[0][4] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.50 alpha: 1.0] retain];
 		_colorTable[1][4] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 1.00 alpha: 1.0] retain];
-		_colorTable[0][5] = [[NSColor colorWithDeviceRed: 0.50 green: 0.00 blue: 5.00 alpha: 1.0] retain];
+		_colorTable[0][5] = [[NSColor colorWithDeviceRed: 0.50 green: 0.00 blue: 0.50 alpha: 1.0] retain];
 		_colorTable[1][5] = [[NSColor colorWithDeviceRed: 1.00 green: 0.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[0][6] = [[NSColor colorWithDeviceRed: 0.00 green: 0.50 blue: 0.50 alpha: 1.0] retain];
 		_colorTable[1][6] = [[NSColor colorWithDeviceRed: 0.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
@@ -44,8 +44,8 @@ static YLLGlobalConfig *sSharedInstance;
 		_colorTable[1][7] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[0][8] = [[NSColor colorWithDeviceRed: 0.75 green: 0.75 blue: 0.75 alpha: 1.0] retain];
 		_colorTable[1][8] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
-		_colorTable[0][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.20 alpha: 1.0] retain];
-		_colorTable[1][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.25 alpha: 1.0] retain];
+		_colorTable[0][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
+		_colorTable[1][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		
 		int i, j;
 		for (i = 0; i < NUM_COLOR; i++) 

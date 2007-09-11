@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
+#import "YLView.h"
 
 @interface YLController : NSObject {
 	IBOutlet id _telnetView;

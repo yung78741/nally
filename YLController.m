@@ -7,8 +7,22 @@
 //
 
 #import "YLController.h"
+#import "YLTelnet.h"
 
+@class YLTerminal;
 
 @implementation YLController
+
+- (void) awakeFromNib {
+//	unsigned char data[] = {0xa4, 0xa4, 0xa4, 0xe5, 0x0A, 0x0D, 0x1B, '[', '3','3','m','P', 'T', 'T'};
+	YLTelnet *telnet = [YLTelnet new];
+	YLTerminal *terminal = [YLTerminal new];
+	[telnet setTerminal: terminal];
+	[terminal setDelegate: _telnetView];
+	[_telnetView setDataSource: terminal];
+
+//	[terminal feedBytes: data length: sizeof(data)];
+	[telnet connectToAddress: @"ptt.cc" port: 23];
+}
 
 @end
