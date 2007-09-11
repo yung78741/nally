@@ -7,6 +7,7 @@
 //
 
 #import "YLSimpleDataSource.h"
+#import "YLLGlobalConfig.h"
 
 static char *templateString = "我達達的馬蹄是美麗的錯誤。我不是歸人，是個澳客。";
 
@@ -19,26 +20,33 @@ static char *templateString = "我達達的馬蹄是美麗的錯誤。我不是�
 }
 
 - (NSColor *) fgColorAtRow: (int) r column: (int) c {
+	return [[YLLGlobalConfig sharedInstance] colorAtIndex: [self fgColorIndexAtRow: r column: c] hilite: NO];}
+
+- (NSColor *) bgColorAtRow: (int) r column: (int) c {
+	return [[YLLGlobalConfig sharedInstance] colorAtIndex: [self bgColorIndexAtRow: r column: c] hilite: NO];
+}
+
+- (int) fgColorIndexAtRow: (int) r column: (int) c {
 	if (r == 5) {
 		if (c == 2 || c== 3) 
-			return [NSColor greenColor];
+			return 3;
 	}
 	
 	if (r == 3) {
 		if (c == 2 || c== 4 || c == 7 || c == 10) 
-			return [NSColor yellowColor];
+			return 4;
 		if (c == 3)
-			return [NSColor purpleColor];
+			return 6;
 	}
-	return nil;
+	return 7;
 }
 
-- (NSColor *) bgColorAtRow: (int) r column: (int) c {
+- (int) bgColorIndexAtRow: (int) r column: (int) c {
 	if (r == 6) {
 		if (c >= 2 && c <= 10) 
-			return [NSColor redColor];
+			return 1;
 	}
-	return nil;
+	return 9;
 }
 
 - (BOOL) isDirtyAtRow: (int) r column:(int) c {

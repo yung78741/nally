@@ -15,6 +15,8 @@
 - (BOOL) isDirtyAtRow: (int) r column:(int) c;
 - (NSColor *) fgColorAtRow: (int) r column: (int) c;
 - (NSColor *) bgColorAtRow: (int) r column: (int) c;
+- (int) fgColorIndexAtRow: (int) r column: (int) c ;
+- (int) bgColorIndexAtRow: (int) r column: (int) c ;
 - (unichar) charAtRow: (int) r column: (int) c;
 - (int) isDoubleByteAtRow: (int) r column:(int) c;
 @end

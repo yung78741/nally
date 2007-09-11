@@ -10,13 +10,15 @@
 
 
 @interface YLView : NSView {
-	NSColor *bgColor;
-	NSColor *fgColor;
+	NSColor *_bgColor;
+	NSColor *_fgColor;
 	
-	int fontWidth;
-	int fontHeight;
+	int _fontWidth;
+	int _fontHeight;
 	
 	id _dataSource;
 }
+
+- (void) drawCellAtRow: (int) r column: (int) c;
 
 @end

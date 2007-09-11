@@ -164,17 +164,6 @@ static char *telopt(int opt)
     return "<unknown>";
 }
 
-struct Opt {
-    int send;			       /* what we initially send */
-    int nsend;			       /* -ve send if requested to stop it */
-    int ack, nak;		       /* +ve and -ve acknowledgements */
-    int option;			       /* the option code */
-    int index;			       /* index into telnet->opt_states[] */
-    enum {
-		REQUESTED, ACTIVE, INACTIVE, REALLY_INACTIVE
-    } initial_state;
-};
-
 enum {
     OPTINDEX_NAWS,
     OPTINDEX_TSPEED,
@@ -189,34 +178,6 @@ enum {
     NUM_OPTS
 };
 
-static const struct Opt o_naws =
-{ WILL, WONT, DO, DONT, TELOPT_NAWS, OPTINDEX_NAWS, REQUESTED };
-static const struct Opt o_tspeed =
-{ WILL, WONT, DO, DONT, TELOPT_TSPEED, OPTINDEX_TSPEED, REQUESTED };
-static const struct Opt o_ttype =
-{ WILL, WONT, DO, DONT, TELOPT_TTYPE, OPTINDEX_TTYPE, REQUESTED };
-static const struct Opt o_oenv =
-{ WILL, WONT, DO, DONT, TELOPT_OLD_ENVIRON, OPTINDEX_OENV, INACTIVE };
-static const struct Opt o_nenv =
-{ WILL, WONT, DO, DONT, TELOPT_NEW_ENVIRON, OPTINDEX_NENV, REQUESTED };
-static const struct Opt o_echo =
-{ DO, DONT, WILL, WONT, TELOPT_ECHO, OPTINDEX_ECHO, REQUESTED };
-static const struct Opt o_we_sga =
-{ WILL, WONT, DO, DONT, TELOPT_SGA, OPTINDEX_WE_SGA, REQUESTED };
-static const struct Opt o_they_sga =
-{ DO, DONT, WILL, WONT, TELOPT_SGA, OPTINDEX_THEY_SGA, REQUESTED };
-static const struct Opt o_we_bin =
-{ WILL, WONT, DO, DONT, TELOPT_BINARY, OPTINDEX_WE_BIN, INACTIVE };
-static const struct Opt o_they_bin =
-{ DO, DONT, WILL, WONT, TELOPT_BINARY, OPTINDEX_THEY_BIN, INACTIVE };
-
-static const struct Opt *const opts[] = {
-    &o_naws, &o_tspeed, &o_ttype, &o_oenv, &o_nenv, &o_echo,
-    &o_we_sga, &o_they_sga, &o_we_bin, &o_they_bin, NULL
-};
-
-#define SB_DELTA 1024
-
 @interface YLTelnet : NSObject {
 	NSString		* _serverAddress;
 	NSFileHandle	* _server;
@@ -227,6 +188,8 @@ static const struct Opt *const opts[] = {
 	BOOL _editing;
 	BOOL _activated;
 	BOOL _synch;
+
+	unsigned char	  _typeOfOperation;
 	
 	unsigned char	  _sbOption;
 	NSMutableData	* _sbBuffer;

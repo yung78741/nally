@@ -8,7 +8,10 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "encoding.h"
+
 int main(int argc, char *argv[])
 {
+	init_table();
     return NSApplicationMain(argc,  (const char **) argv);
 }
