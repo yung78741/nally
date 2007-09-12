@@ -92,9 +92,15 @@ void dump_packet(unsigned char *s, int length) {
 }
 
 - (void) receiveMessage: (NSNotification *) notify {
-	[_server readInBackgroundAndNotify];
 
 	NSData *messageData = [[notify userInfo] objectForKey: NSFileHandleNotificationDataItem];
+	if ([messageData length] == 0) {
+		NSLog(@"Disconnect.");
+		return;
+	}
+		
+	[_server readInBackgroundAndNotify];
+
 	unsigned char *stream = (unsigned char *) [messageData bytes];
 	std::deque<unsigned char> terminalBuf;
 	
