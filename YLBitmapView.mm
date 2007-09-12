@@ -6,18 +6,20 @@
 //  Copyright 2006 yllan. All rights reserved.
 //
 
-#import "YLView.h"
+#import "YLBitmapView.h"
 #import "YLTerminal.h"
 #import "encoding.h"
 #import "YLTelnet.h"
 #import "YLLGLobalConfig.h"
 
-@implementation YLView
+@implementation YLBitmapView
 
-static id gConfig;
+static YLLGlobalConfig *gConfig;
 static int gRow;
 static int gColumn;
-static NSImage *gLeftImage;
+static int gTotalPixels;
+static int gRowPixels;
+static int gLinePixels;
 
 - (id)initWithFrame:(NSRect)frame {
 	if (!gConfig) gConfig = [YLLGlobalConfig sharedInstance];
@@ -33,24 +35,27 @@ static NSImage *gLeftImage;
 		_fontWidth = [gConfig cellWidth];
 		_fontHeight = [gConfig cellHeight];
 		
-		
-		_backedImage = [[NSImage alloc] initWithSize: frame.size];
-		[_backedImage setFlipped: YES];
-		[_backedImage lockFocus];
-		[[gConfig colorAtIndex: 9 hilite: NO] set];
-		[NSBezierPath fillRect: NSMakeRect(0, 0, frame.size.width, frame.size.height)];
-		[_backedImage unlockFocus];
-
-		if (!gLeftImage) {
-			gLeftImage = [[NSImage alloc] initWithSize: NSMakeSize(_fontWidth, _fontHeight)];
-			[gLeftImage setFlipped: YES];			
-		}
+		gLinePixels = gColumn * _fontWidth;
+		gRowPixels = gLinePixels * _fontHeight;
+		gTotalPixels = gRowPixels * gRow;
+				
+		_imgRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes: NULL
+														  pixelsWide: gLinePixels
+														  pixelsHigh: gRow * _fontHeight 
+													   bitsPerSample: 8
+													 samplesPerPixel: 3
+															hasAlpha: NO
+															isPlanar: NO
+													  colorSpaceName: NSCalibratedRGBColorSpace
+														 bytesPerRow: gLinePixels * 4
+														bitsPerPixel: 32];
+		_mem = (unsigned int *) [_imgRep bitmapData];
     }
     return self;
 }
 
 - (void) dealloc {
-	[_backedImage release];
+	free(_mem);
 	[super dealloc];
 }
 
@@ -80,45 +85,12 @@ static NSImage *gLeftImage;
 #pragma mark -
 #pragma mark Drawing
 
-- (NSRect) cellRectForRect: (NSRect) r {
-	int originx = r.origin.x / _fontWidth;
-	int originy = r.origin.y / _fontHeight;
-	int width = ((r.size.width + r.origin.x) / _fontWidth) - originx + 1;
-	int height = ((r.size.height + r.origin.y) / _fontHeight) - originy + 1;
-	return NSMakeRect(originx, originy, width, height);
-}
-
 - (void)drawRect:(NSRect)rect {
-	NSRect imgRect = rect;
-	imgRect.origin.y = (_fontHeight * gRow) - rect.origin.y - rect.size.height;
-	[_backedImage compositeToPoint: NSMakePoint(rect.origin.x, rect.origin.y + rect.size.height)
-						  fromRect: imgRect
-						 operation: NSCompositeCopy];
-/*
-	int x, y;
-	for (x = 0; x < [gConfig column]; x++) {
-		NSBezierPath *bp = [NSBezierPath new];
-		[bp moveToPoint: NSMakePoint(x * _fontWidth, 0)];
-		[bp lineToPoint: NSMakePoint(x * _fontWidth, [gConfig row] * _fontHeight)];
-		[[NSColor greenColor] set];
-		[bp stroke];
-		[bp release];
-	}
-
-	for (y = 0; y < [gConfig row]; y++) {
-		NSBezierPath *bp = [NSBezierPath new];
-		[bp moveToPoint: NSMakePoint(0, y * _fontHeight)];
-		[bp lineToPoint: NSMakePoint([gConfig column] * _fontWidth,  y * _fontHeight)];
-		[[NSColor greenColor] set];
-		[bp stroke];
-		[bp release];
-	}
-/**/
+	[_imgRep drawAtPoint: NSMakePoint(0, 0)];
 }
 
 - (void) update {
 	int x, y;
-	[_backedImage lockFocus];
 	for (y = 0; y < gRow; y++) {
 		[_dataSource updateDoubleByteStateForRow: y];
 		for (x = 0; x < gColumn; x++) {
@@ -131,16 +103,13 @@ static NSImage *gLeftImage;
 			}
 		}
 	}
-	[_backedImage unlockFocus];
+	[self setNeedsDisplay: YES];
 }
 
 - (void) updateRow: (int) r from: (int) start to: (int) end {
 	int c;
 	cell *currRow = [_dataSource cellsOfRow: r];
 	NSRect rowRect = NSMakeRect(start * _fontWidth, r * _fontHeight, (end - start) * _fontWidth, _fontHeight);
-//	[[NSColor colorWithCalibratedRed: (float)rand() / RAND_MAX green: (float)rand() / RAND_MAX blue: (float)rand() / RAND_MAX alpha: 1.0] set];
-//	[NSBezierPath fillRect: rowRect];
-//	NSLog(@"%d (%d ~ %d)", r, start, end);
 
 	attribute currAttr, lastAttr = (currRow + start)->attr;
 	int length = 0;
@@ -152,25 +121,30 @@ static NSImage *gLeftImage;
 			/* Draw Background */
 			NSRect rect = NSMakeRect((c - length) * _fontWidth, r * _fontHeight,
 								  _fontWidth * length, _fontHeight);
-			if (lastAttr.f.reverse)
-				[[gConfig colorAtIndex: lastAttr.f.fgColor hilite: NO] set];
-			else
-				[[gConfig colorAtIndex: lastAttr.f.bgColor hilite: NO] set];
-			[NSBezierPath fillRect: rect];
+			int idx = lastAttr.f.reverse ? lastAttr.f.fgColor : lastAttr.f.bgColor;
+			unsigned int color = gConfig->_bitmapColorTable[0][idx];
+			int i, j;
+			int base = gRowPixels * r + (c - length) * _fontWidth;
+			for (j = 0; j < _fontHeight; j++) {
+				for (i = 0; i < length * _fontWidth; i++) {
+					_mem[base + i] = color;
+				}
+				base += gLinePixels;
+			}
 			
 			/* Draw Foreground */
 			int x;
 			for (x = c - length; x < c; x++) {
 				int db = (currRow + x)->attr.f.doubleByte;
-//				int db = [_dataSource isDoubleByteAtRow: r column: x];
 				
 				int colorIndex = lastAttr.f.reverse?lastAttr.f.bgColor:lastAttr.f.fgColor;
 				
 				/* Draw Underline */
 				if (lastAttr.f.underline) {
-					[[gConfig colorAtIndex: colorIndex hilite: lastAttr.f.bold] set];
-					[NSBezierPath strokeLineFromPoint: NSMakePoint(x * _fontWidth, (r+1) * _fontHeight - 0.5) 
-											  toPoint: NSMakePoint((x+1) * _fontWidth, (r+1) * _fontHeight - 0.5) ];
+					color = gConfig->_bitmapColorTable[lastAttr.f.bold][colorIndex];
+					base = gRowPixels * (r+1) + x * _fontWidth - gLinePixels;
+					for (i = 0; i < _fontWidth; i++)
+						_mem[base + i] = color;
 				}
 				
 				/* Draw Character */
@@ -194,19 +168,19 @@ static NSImage *gLeftImage;
 
 					[self drawChar: ch atPoint: NSMakePoint((x-1) * _fontWidth, r * _fontHeight) 
 					   withAttribute: lastAttr];
-					
-					if (x == c - length) { // double color
-						attribute prevAttr = [_dataSource attrAtRow: r column: x - 1];
-						
-						[gLeftImage lockFocus];
-						int bgColorIndex = prevAttr.f.reverse ? prevAttr.f.fgColor : prevAttr.f.bgColor;
-						[[gConfig colorAtIndex: bgColorIndex hilite: NO] set];
-						[NSBezierPath fillRect: NSMakeRect(0, 0, _fontWidth, _fontHeight)];
-						[self drawChar: ch atPoint: NSMakePoint(0, 0)
-						   withAttribute: prevAttr];
-						[gLeftImage unlockFocus];
-						[gLeftImage compositeToPoint: NSMakePoint((x-1) * _fontWidth, (r+1) * _fontHeight) operation: NSCompositeCopy];
-					}
+//					
+//					if (x == c - length) { // double color
+//						attribute prevAttr = [_dataSource attrAtRow: r column: x - 1];
+//						
+//						[gLeftImage lockFocus];
+//						int bgColorIndex = prevAttr.f.reverse ? prevAttr.f.fgColor : prevAttr.f.bgColor;
+//						[[gConfig colorAtIndex: bgColorIndex hilite: NO] set];
+//						[NSBezierPath fillRect: NSMakeRect(0, 0, _fontWidth, _fontHeight)];
+//						[self drawChar: ch atPoint: NSMakePoint(0, 0)
+//						   withAttribute: prevAttr];
+//						[gLeftImage unlockFocus];
+//						[gLeftImage compositeToPoint: NSMakePoint((x-1) * _fontWidth, (r+1) * _fontHeight) operation: NSCompositeCopy];
+//					}
 				}
 			}
 			
@@ -217,65 +191,57 @@ static NSImage *gLeftImage;
 			length++;
 		}
 	}
-	
-	[self setNeedsDisplayInRect: rowRect];
+
 }
 
 - (void) drawChar: (unichar) ch atPoint: (NSPoint) origin withAttribute: (attribute) attr  {
 	int colorIndex = attr.f.reverse ? attr.f.bgColor : attr.f.fgColor;
-	NSColor *color = [gConfig colorAtIndex: colorIndex hilite: attr.f.bold];
-	if (ch <= 0x0020) {
+	unsigned int color = gConfig->_bitmapColorTable[attr.f.bold][colorIndex];
+	int base, i, j;
+	base = origin.y * gLinePixels + origin.x;
+	
+	if (ch <= 0x0020 || ch == 0x0000) {
 		return;
 	} else if (ch == 0x25FC) { // ◼ BLACK SQUARE
-		
+		for (j = 0; j < _fontHeight; j++) {
+			for (i = 0; i < _fontWidth * 2; i++) {
+				_mem[base + i] = color;
+			}
+			base += gLinePixels;
+		}
 	} else if (ch >= 0x2581 && ch <= 0x2588) { // BLOCK ▁▂▃▄▅▆▇█
-		NSRect r = NSMakeRect(origin.x, origin.y + _fontHeight * (0x2588 - ch) / 8, 2 * _fontWidth, _fontHeight * (ch - 0x2580) / 8);
-		[color set];
-		[NSBezierPath fillRect: r];
+		base = base + gRowPixels - gLinePixels;
+		for (j = 0; j < _fontHeight * (ch - 0x2580) / 8; j++) {
+			for (i = 0; i < _fontWidth * 2; i++) {
+				_mem[base + i] = color;
+			}
+			base -= gLinePixels;
+		}	
 	} else if (ch >= 0x2589 && ch <= 0x258F) { // BLOCK ▉▊▋▌▍▎▏
-		NSRect r = NSMakeRect(origin.x, origin.y, 2 * _fontWidth * (0x2590 - ch) / 8, _fontHeight);
-		[color set];
-		[NSBezierPath fillRect: r];		
+		int w = _fontWidth * (0x2590 - ch) / 4;
+		for (j = 0; j < _fontHeight; j++) {
+			for (i = 0; i < w; i++) {
+				_mem[base + i] = color;
+			}
+			base += gLinePixels;
+		}
 	} else if (ch >= 0x25E2 && ch <= 0x25E5) { // TRIANGLE ◢◣◤◥
-		NSPoint pts[4] = {	NSMakePoint(origin.x + 2 * _fontWidth, origin.y), 
-							NSMakePoint(origin.x + 2 * _fontWidth, origin.y + _fontHeight), 
-							NSMakePoint(origin.x, origin.y + _fontHeight), 
-							NSMakePoint(origin.x, origin.y) };
-		int base = ch - 0x25E2;
-		NSBezierPath *bp = [[NSBezierPath alloc] init];
-		[bp moveToPoint: pts[base]];
-		int i;
-		for (i = 1; i < 3; i++)	
-			[bp lineToPoint: pts[(base + i) % 4]];
-		[bp closePath];
-		[color set];
-		[bp fill];
-		[bp release];
-	} else if (ch == 0x0) {
-	} else if (ch == 0x0) {
+		
 	} else if (ch == 0x0) {
 		
 	} else if (ch > 0x0080) {
 		origin.y -= 2;
-//#define DRAWFONTBOUNDARYONLY		
-		
-#ifdef DRAWFONTBOUNDARYONLY		
-		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 2.5, _fontWidth * 2 - 1, _fontHeight - 1);
-		[[NSColor whiteColor] set];
-		[NSBezierPath strokeRect: r];
-#else
-		NSString *str = [NSString stringWithCharacters: &ch length: 1];
-		[str drawAtPoint: origin withAttributes: [gConfig cFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
-#endif
+//		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 2.5, _fontWidth * 2 - 1, _fontHeight - 1);
+//		[[NSColor whiteColor] set];
+//		[NSBezierPath strokeRect: r];
+//		NSString *str = [NSString stringWithCharacters: &ch length: 1];
+//		[str drawAtPoint: origin withAttributes: [gConfig cFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
 	} else {
-#ifdef DRAWFONTBOUNDARYONLY		
-		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 0.5, _fontWidth - 1, _fontHeight - 1);
-		[[NSColor yellowColor] set];
-		[NSBezierPath strokeRect: r];
-#else
-		NSString *str = [NSString stringWithCharacters: &ch length: 1];
-		[str drawAtPoint: origin withAttributes: [gConfig eFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
-#endif
+//		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 0.5, _fontWidth - 1, _fontHeight - 1);
+//		[[NSColor yellowColor] set];
+//		[NSBezierPath strokeRect: r];
+//		NSString *str = [NSString stringWithCharacters: &ch length: 1];
+//		[str drawAtPoint: origin withAttributes: [gConfig eFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
 	}
 }
 
@@ -284,7 +250,7 @@ static NSImage *gLeftImage;
 #pragma mark Override
 
 - (BOOL) isFlipped {
-	return YES;
+	return NO;
 }
 
 - (BOOL) isOpaque {

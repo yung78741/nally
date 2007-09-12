@@ -16,7 +16,8 @@ typedef union {
 		unsigned int underline	: 1;
 		unsigned int blink		: 1;
 		unsigned int reverse	: 1;
-		unsigned int nothing	: 4;
+		unsigned int doubleByte	: 2;
+		unsigned int nothing	: 2;
 	} f;
 } attribute;
 

@@ -20,6 +20,7 @@
 	NSFont *_eFont;
 	NSFont *_cFont;
 	
+	unsigned int _bitmapColorTable[2][NUM_COLOR];
 	NSColor *_colorTable[2][NUM_COLOR];
 	NSDictionary *_cDictTable[2][NUM_COLOR];
 	NSDictionary *_eDictTable[2][NUM_COLOR];
@@ -48,6 +49,7 @@
 - (NSColor *) colorAtIndex: (int) i hilite: (BOOL) h ;
 - (void) setColor: (NSColor *) c hilite: (BOOL) h atIndex: (int) i ;
 
+- (unsigned short) bitmapColorAtIndex: (int) i hilite: (BOOL) h ;
 
 - (NSDictionary *) cFontAttributeForColorIndex: (int) i hilite: (BOOL) h ;
 - (NSDictionary *) eFontAttributeForColorIndex: (int) i hilite: (BOOL) h ;

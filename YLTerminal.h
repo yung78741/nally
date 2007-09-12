@@ -47,6 +47,8 @@
 - (NSColor *) bgColorAtRow: (int) r column: (int) c;
 - (BOOL) boldAtRow:(int) r column:(int) c ;
 - (unichar) charAtRow: (int) r column: (int) c;
+- (cell *) cellsOfRow: (int) r ;
+- (void) updateDoubleByteStateForRow: (int) r ;
 - (int) isDoubleByteAtRow: (int) r column:(int) c;
 - (void) setAllDirty ;
 - (void) setDirty: (BOOL) d atRow: (int) r column: (int) c ;

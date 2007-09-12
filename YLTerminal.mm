@@ -163,7 +163,20 @@ static unsigned short gEmptyAttr;
 				_csArg->clear();
 				_csTemp = 0;
 				_state = TP_CONTROL;
+			} else if (c == 'M') {
+				if (_cursorY == 0) {
+					_offset = (_offset + _row - 1) % _row;
+					for (x = 0; x < _column; x++) {
+						GRID(x, _cursorY).byte = '\0';
+						GRID(x, _cursorY).attr.v = gEmptyAttr;
+						[self setAllDirty];
+					}
+				} else {
+					_cursorY--;
+				}
+				_state = TP_NORMAL;
 			} else {
+				NSLog(@"unprocessed esc: %c(0x%X)", c, c);
 				_state = TP_NORMAL;
 			}
 		} else if (_state == TP_CONTROL) {
@@ -365,6 +378,24 @@ static unsigned short gEmptyAttr;
 		return B2U[index];
 	}
 	return 0;
+}
+
+- (cell *) cellsOfRow: (int) r {
+	return _grid + ((r + _offset) % _row) * _column;
+}
+
+- (void) updateDoubleByteStateForRow: (int) r {
+	cell *currRow = _grid + ((r + _offset) % _row) * _column;
+	int i, db = 0;
+	for (i = 0; i < _column; i++) {
+		if (db == 0 || db == 2) {
+			if ((currRow + i)->byte > 0x7F) db = 1;
+			else db = 0;
+		} else { // db == 1
+			db = 2;
+		}
+		(currRow + i)->attr.f.doubleByte = db;
+	}
 }
 
 - (int) isDoubleByteAtRow: (int) r column:(int) c {

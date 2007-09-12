@@ -12,14 +12,15 @@
 @class YLTerminal;
 @class YLTelnet;
 
-@interface YLView : NSView {
+@interface YLBitmapView : NSView {
 	NSColor *_bgColor;
 	NSColor *_fgColor;
 	
 	int _fontWidth;
 	int _fontHeight;
 	
-	NSImage *_backedImage;
+	NSBitmapImageRep *_imgRep;
+	unsigned int *_mem;
 	
 	YLTerminal *_dataSource;
 	YLTelnet *_telnet;

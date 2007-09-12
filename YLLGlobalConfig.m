@@ -46,6 +46,29 @@ static YLLGlobalConfig *sSharedInstance;
 		_colorTable[1][8] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[0][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
+//		_colorTable[0][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.15 alpha: 1.0] retain];
+//		_colorTable[1][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.15 alpha: 1.0] retain];
+
+		_bitmapColorTable[0][0] = 0x00000000;
+		_bitmapColorTable[1][0] = 0x40404000;
+		_bitmapColorTable[0][1] = 0x80000000;
+		_bitmapColorTable[1][1] = 0xFF000000;
+		_bitmapColorTable[0][2] = 0x00800000;
+		_bitmapColorTable[1][2] = 0x00FF0000;
+		_bitmapColorTable[0][3] = 0x80800000;
+		_bitmapColorTable[1][3] = 0xFFFF0000;
+		_bitmapColorTable[0][4] = 0x00008000;
+		_bitmapColorTable[1][4] = 0x0000FF00;
+		_bitmapColorTable[0][5] = 0x80008000;
+		_bitmapColorTable[1][5] = 0xFF00FF00;
+		_bitmapColorTable[0][6] = 0x00808000;
+		_bitmapColorTable[1][6] = 0x00FFFF00;
+		_bitmapColorTable[0][7] = 0x80808000;
+		_bitmapColorTable[1][7] = 0xFFFFFF00;
+		_bitmapColorTable[0][8] = 0xC0C0C000;
+		_bitmapColorTable[1][8] = 0xFFFFFF00;
+		_bitmapColorTable[0][9] = 0x00000000;
+		_bitmapColorTable[1][9] = 0x00000000;
 		
 		int i, j;
 		for (i = 0; i < NUM_COLOR; i++) 
@@ -126,6 +149,13 @@ static YLLGlobalConfig *sSharedInstance;
 		return _colorTable[h][i];
 	return _colorTable[0][NUM_COLOR - 1];
 }
+
+- (unsigned short) bitmapColorAtIndex: (int) i hilite: (BOOL) h {
+	if (i >= 0 && i < NUM_COLOR) 
+		return _bitmapColorTable[h][i];
+	return _bitmapColorTable[0][NUM_COLOR - 1];
+}
+
 
 - (void) setColor: (NSColor *) c hilite: (BOOL) h atIndex: (int) i {
 	if (i >= 0 && i < NUM_COLOR) {
