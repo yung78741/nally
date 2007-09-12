@@ -267,7 +267,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>10</integer>
+									<integer>14</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -310,7 +310,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>YLTerminal.mm</string>
+								<string>YLTelnet.mm</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -318,29 +318,28 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>YLTerminal.mm</string>
+										<string>YLTelnet.mm</string>
 										<key>_historyCapacity</key>
 										<integer>10</integer>
 										<key>bookmark</key>
-										<string>850E148A0C978CEA00ECD44E</string>
+										<string>850E14B40C9797F500ECD44E</string>
 										<key>history</key>
 										<array>
-											<string>859779EB0C8A14470086FFF9</string>
 											<string>85977A630C8A806F0086FFF9</string>
-											<string>850E144A0C978C9400ECD44E</string>
 											<string>850E144B0C978C9400ECD44E</string>
 											<string>850E144C0C978C9400ECD44E</string>
 											<string>850E144D0C978C9400ECD44E</string>
 											<string>850E144E0C978C9400ECD44E</string>
-											<string>850E144F0C978C9400ECD44E</string>
 											<string>850E14500C978C9400ECD44E</string>
-											<string>850E14610C978C9400ECD44E</string>
+											<string>850E14AB0C9797F500ECD44E</string>
+											<string>850E14AC0C9797F500ECD44E</string>
+											<string>850E14AD0C9797F500ECD44E</string>
+											<string>850E14AE0C9797F500ECD44E</string>
 										</array>
 										<key>prevStack</key>
 										<array>
 											<string>85F701B80C897BE700E27A1E</string>
 											<string>85F701FE0C897BE700E27A1E</string>
-											<string>859779F10C8A14470086FFF9</string>
 											<string>85977A6C0C8A806F0086FFF9</string>
 											<string>850E14520C978C9400ECD44E</string>
 											<string>850E14530C978C9400ECD44E</string>
@@ -350,6 +349,11 @@
 											<string>850E14580C978C9400ECD44E</string>
 											<string>850E145B0C978C9400ECD44E</string>
 											<string>850E145D0C978C9400ECD44E</string>
+											<string>850E14AF0C9797F500ECD44E</string>
+											<string>850E14B00C9797F500ECD44E</string>
+											<string>850E14B10C9797F500ECD44E</string>
+											<string>850E14B20C9797F500ECD44E</string>
+											<string>850E14B30C9797F500ECD44E</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -543,9 +547,12 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>85F7023B0C897C2300E27A1E</string>
+		<string>1CD10A99069EF8BA00B06720</string>
+		<string>850E14A50C97953200ECD44E</string>
+		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>85145B280AB40FBF009FC710</string>
 		<string>/Users/yllan/Project/MacBlueTelnet/MacBlueTelnet.xcodeproj</string>
-		<string>1C0AD2B3069F1EA900FABCE6</string>
 	</array>
 	<key>WindowString</key>
 	<string>1134 -181 1076 949 1024 -256 1280 1024 </string>
@@ -586,6 +593,8 @@
 							<string>206pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -636,7 +645,7 @@
 			<key>WindowToolGUID</key>
 			<string>85145B280AB40FBF009FC710</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>
@@ -667,8 +676,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {339, 420}}</string>
-											<string>{{339, 0}, {419, 420}}</string>
+											<string>{{0, 0}, {338, 435}}</string>
+											<string>{{338, 0}, {420, 435}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -683,8 +692,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {758, 420}}</string>
-											<string>{{0, 420}, {758, 430}}</string>
+											<string>{{0, 0}, {758, 435}}</string>
+											<string>{{0, 435}, {758, 415}}</string>
 										</array>
 									</dict>
 								</dict>
@@ -731,14 +740,14 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>852E74D30C967A5D0027751F</string>
+				<string>850E149F0C97953200ECD44E</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>852E74D40C967A5D0027751F</string>
-				<string>852E74D50C967A5D0027751F</string>
-				<string>852E74D60C967A5D0027751F</string>
-				<string>852E74D70C967A5D0027751F</string>
-				<string>852E74D80C967A5D0027751F</string>
-				<string>852E74D90C967A5D0027751F</string>
+				<string>850E14A00C97953200ECD44E</string>
+				<string>850E14A10C97953200ECD44E</string>
+				<string>850E14A20C97953200ECD44E</string>
+				<string>850E14A30C97953200ECD44E</string>
+				<string>850E14A40C97953200ECD44E</string>
+				<string>850E14A50C97953200ECD44E</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debug</string>
@@ -892,7 +901,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>85F7023B0C897C2300E27A1E</string>
-				<string>852E74DA0C967A5D0027751F</string>
+				<string>850E14A60C97953200ECD44E</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>WindowString</key>
