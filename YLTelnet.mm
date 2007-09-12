@@ -92,6 +92,8 @@ void dump_packet(unsigned char *s, int length) {
 }
 
 - (void) receiveMessage: (NSNotification *) notify {
+	[_server readInBackgroundAndNotify];
+
 	NSData *messageData = [[notify userInfo] objectForKey: NSFileHandleNotificationDataItem];
 	unsigned char *stream = (unsigned char *) [messageData bytes];
 	std::deque<unsigned char> terminalBuf;
@@ -99,7 +101,7 @@ void dump_packet(unsigned char *s, int length) {
 	/* parse the telnet command. */
 	int L = [messageData length];
 #ifdef __DUMPPACKET__
-	dump_packet(stream, L);
+//	dump_packet(stream, L);
 #endif
 	
 	while (L--) {
@@ -218,9 +220,6 @@ void dump_packet(unsigned char *s, int length) {
 		}
 		[_terminal feedBytes: chunkBuf length: length];
 	}
-	
-	[_server readInBackgroundAndNotify];
-	
 }
 
 - (void) sendBytes: (unsigned char *) _msg length: (unsigned int) length {

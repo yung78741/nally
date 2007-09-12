@@ -9,8 +9,12 @@
 #import <Cocoa/Cocoa.h>
 #import "YLView.h"
 
+@class YLTerminal;
+
 @interface YLController : NSObject {
 	IBOutlet id _telnetView;
+	NSTimer *_updateViewTimer;
+	YLTerminal *_terminal;
 }
 
 @end

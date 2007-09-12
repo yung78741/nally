@@ -7,20 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#include <deque>
-
-typedef struct {
-	unsigned char byte;
-	unsigned int fgColor	: 4;
-	unsigned int bgColor	: 4;
-//	unsigned int clear		: 1;
-	unsigned int bold		: 1;
-	unsigned int underline	: 1;
-	unsigned int blink		: 1;
-	unsigned int reverse	: 1;
-} cell;
-
-typedef enum {C0, INTERMEDIATE, ALPHABETIC, DELETE, C1, G1, SPECIAL, ERROR} ASCII_CODE;
+#import <deque>
+#import "CommonType.h"
 
 @interface YLTerminal : NSObject {	
 	unsigned int _row;
@@ -40,6 +28,7 @@ typedef enum {C0, INTERMEDIATE, ALPHABETIC, DELETE, C1, G1, SPECIAL, ERROR} ASCI
 	BOOL _reverse;
 	
 	cell *_grid;
+	char *_dirty;
 	
 	enum { TP_NORMAL, TP_ESCAPE, TP_CONTROL } _state;
 
@@ -53,11 +42,14 @@ typedef enum {C0, INTERMEDIATE, ALPHABETIC, DELETE, C1, G1, SPECIAL, ERROR} ASCI
 - (void) feedBytes: (const unsigned char *) bytes length: (int) len ;
 
 - (BOOL) isDirtyAtRow: (int) r column:(int) c;
+- (attribute) attrAtRow: (int) r column: (int) c ;
 - (NSColor *) fgColorAtRow: (int) r column: (int) c;
 - (NSColor *) bgColorAtRow: (int) r column: (int) c;
 - (BOOL) boldAtRow:(int) r column:(int) c ;
 - (unichar) charAtRow: (int) r column: (int) c;
 - (int) isDoubleByteAtRow: (int) r column:(int) c;
+- (void) setAllDirty ;
+- (void) setDirty: (BOOL) d atRow: (int) r column: (int) c ;
 
 - (void) setDelegate: (id) d;
 - (id) delegate;

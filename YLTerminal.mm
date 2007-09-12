@@ -41,6 +41,7 @@ ASCII_CODE asciiCodeFamily(unsigned char c) {
 }
 
 static SEL normal_table[256];
+static unsigned short gEmptyAttr;
 
 @implementation YLTerminal
 
@@ -70,15 +71,21 @@ static SEL normal_table[256];
 		_cursorX = 0;
 		_cursorY = 0;
 		_grid = (cell *) malloc(sizeof(cell) * (_row * _column));
+		_dirty = (char *) malloc(sizeof(char) * (_row * _column));
 		int i;
+		
+		_grid[0].attr.f.fgColor = 7;
+		_grid[0].attr.f.bgColor = 9;
+		_grid[0].attr.f.bold = 0;
+		_grid[0].attr.f.underline = 0;
+		_grid[0].attr.f.blink = 0;
+		_grid[0].attr.f.reverse = 0;
+		_grid[0].attr.f.nothing = 0;
+		gEmptyAttr = _grid[0].attr.v;
 		for (i = 0; i < (_row * _column); i++) {
-			_grid[i].fgColor = 7;
-			_grid[i].bgColor = 9;
-			_grid[i].byte = 0;
-			_grid[i].bold = 0;
-			_grid[i].underline = 0;
-			_grid[i].blink = 0;
-			_grid[i].reverse = 0;
+			_grid[i].byte = '\0';
+			_grid[i].attr.v = gEmptyAttr;
+			_dirty[i] = YES;
 		}
 		_csBuf = new std::deque<unsigned char>();
 		_csArg = new std::deque<int>();
@@ -121,7 +128,11 @@ static SEL normal_table[256];
 			} else if (c == 0x0A) { // Linefeed 
 				if (_cursorY == _row - 1) {
 					_offset = (_offset + 1) % _row;
-					for (x = 0; x < _column; x++) GRID(x, _cursorY).byte = '\0';
+					for (x = 0; x < _column; x++) {
+						GRID(x, _cursorY).byte = '\0';
+						GRID(x, _cursorY).attr.v = gEmptyAttr;
+						[self setAllDirty];
+					}
 				} else {
 					_cursorY++;
 				}
@@ -137,12 +148,13 @@ static SEL normal_table[256];
 			} else {
 //				NSLog(@"insert %d @ %d %d", c, _cursorX, _cursorY);
 				GRID(_cursorX, _cursorY).byte = c;
-				GRID(_cursorX, _cursorY).fgColor = _fgColor;
-				GRID(_cursorX, _cursorY).bgColor = _bgColor;
-				GRID(_cursorX, _cursorY).bold = _bold;
-				GRID(_cursorX, _cursorY).underline = _underline;
-				GRID(_cursorX, _cursorY).blink = _blink;
-				GRID(_cursorX, _cursorY).reverse = _reverse;
+				GRID(_cursorX, _cursorY).attr.f.fgColor = _fgColor;
+				GRID(_cursorX, _cursorY).attr.f.bgColor = _bgColor;
+				GRID(_cursorX, _cursorY).attr.f.bold = _bold;
+				GRID(_cursorX, _cursorY).attr.f.underline = _underline;
+				GRID(_cursorX, _cursorY).attr.f.blink = _blink;
+				GRID(_cursorX, _cursorY).attr.f.reverse = _reverse;
+				[self setDirty: YES atRow: _cursorY column: _cursorX];
 				_cursorX++;
 			}
 		} else if (_state == TP_ESCAPE) {
@@ -230,7 +242,8 @@ static SEL normal_table[256];
 					for (idx = start; idx <= end; idx++) {
 						int memIdx = (idx + _offset * _column) % (_row * _column);
 						_grid[memIdx].byte = '\0';
-						_grid[memIdx].bgColor = 9;
+						_grid[memIdx].attr.v = gEmptyAttr;
+						_dirty[idx] = YES;
 					}
 				} else if (c == 'K') {		// Erase Line (cursor does not move)
 					/* 
@@ -246,7 +259,8 @@ static SEL normal_table[256];
 					int idx;
 					for (idx = start; idx <= end; idx++) {
 						GRID(idx, _cursorY).byte = '\0';
-						GRID(idx, _cursorY).bgColor = 9;
+						GRID(idx, _cursorY).attr.v = gEmptyAttr;
+						_dirty[idx + _cursorY * _column] = YES;
 					}
 				} else if (c == 'L') {
 				} else if (c == 'M') {
@@ -263,7 +277,7 @@ static SEL normal_table[256];
 							int p = _csArg->front();
 							_csArg->pop_front();
 							if (p  == 0) {
-								_fgColor = 9;
+								_fgColor = 7;
 								_bgColor = 9;
 								_bold = NO;
 								_underline = NO;
@@ -294,34 +308,49 @@ static SEL normal_table[256];
 			}
 		}
 	}
-	[_delegate setNeedsDisplay: YES];
+	[_delegate update];
 }
 
 # pragma mark -
 # pragma mark 
 
+- (void) setAllDirty {
+	int i, end = _column * _row;
+	for (i = 0; i < end; i++)
+		_dirty[i] = YES;
+}
+
 - (BOOL) isDirtyAtRow: (int) r column:(int) c {
-	return YES;
+//	return YES;
+	return _dirty[(r) * _column + (c)];
+}
+
+- (void) setDirty: (BOOL) d atRow: (int) r column: (int) c {
+	_dirty[(r) * _column + (c)] = d;
+}
+
+- (attribute) attrAtRow: (int) r column: (int) c {
+	return GRID(c, r).attr;
 }
 
 - (NSColor *) fgColorAtRow: (int) r column: (int) c {
-	return [[YLLGlobalConfig sharedInstance] colorAtIndex: GRID(c, r).fgColor hilite: GRID(c, r).bold];
+	return [[YLLGlobalConfig sharedInstance] colorAtIndex: GRID(c, r).attr.f.fgColor hilite: GRID(c, r).attr.f.bold];
 }
 
 - (NSColor *) bgColorAtRow: (int) r column: (int) c {
-	return [[YLLGlobalConfig sharedInstance] colorAtIndex: GRID(c, r).bgColor hilite: NO];	
+	return [[YLLGlobalConfig sharedInstance] colorAtIndex: GRID(c, r).attr.f.bgColor hilite: NO];	
 }
 
 - (BOOL) boldAtRow:(int) r column:(int) c {
-	return GRID(c, r).bold;
+	return GRID(c, r).attr.f.bold;
 }
 
 - (int) fgColorIndexAtRow: (int) r column: (int) c {
-	return GRID(c, r).fgColor;
+	return GRID(c, r).attr.f.fgColor;
 }
 
 - (int) bgColorIndexAtRow: (int) r column: (int) c {
-	return GRID(c, r).bgColor;	
+	return GRID(c, r).attr.f.bgColor;	
 }
 
 
@@ -341,7 +370,7 @@ static SEL normal_table[256];
 - (int) isDoubleByteAtRow: (int) r column:(int) c {
 	int i;
 	int db = 0;
-	if (c == _column - 1) return 0;
+//	if (c == _column - 1) return 0;
 	for (i = 0; i <= c; i++) {
 		unsigned char c = GRID(i, r).byte;
 		if (db == 0 || db == 2) {

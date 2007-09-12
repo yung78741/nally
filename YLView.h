@@ -7,7 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "CommonType.h"
 
+@class YLTerminal;
+@class YLTelnet;
 
 @interface YLView : NSView {
 	NSColor *_bgColor;
@@ -16,15 +19,19 @@
 	int _fontWidth;
 	int _fontHeight;
 	
-	id _dataSource;
+	NSImage *_backedImage;
+	
+	YLTerminal *_dataSource;
+	YLTelnet *_telnet;
 }
 
-- (void) drawCellAtRow: (int) r column: (int) c;
-- (void) drawString: (NSString *) str atPoint: (NSPoint) origin withAttributes: (NSDictionary *) attribute unichar: (unichar) ch color: (NSColor *) color;
-
+- (void) updateRow: (int) r from: (int) start to: (int) end ;
+//- (void) drawCellAtRow: (int) r column: (int) c;
+- (void) drawString: (NSString *) str atPoint: (NSPoint) origin withAttribute: (attribute) attr unichar: (unichar) ch ;
 - (id)dataSource;
 - (void)setDataSource:(id)value;
-
+- (YLTelnet *)telnet;
+- (void)setTelnet:(YLTelnet *)value;
 
 
 @end
