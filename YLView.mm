@@ -12,12 +12,12 @@
 #import "YLTelnet.h"
 #import "YLLGLobalConfig.h"
 
-@implementation YLView
-
-static id gConfig;
+static YLLGlobalConfig *gConfig;
 static int gRow;
 static int gColumn;
 static NSImage *gLeftImage;
+
+@implementation YLView
 
 - (id)initWithFrame:(NSRect)frame {
 	if (!gConfig) gConfig = [YLLGlobalConfig sharedInstance];
@@ -27,9 +27,6 @@ static NSImage *gLeftImage;
 	frame.size = NSMakeSize(gColumn * [gConfig cellWidth], gRow * [gConfig cellHeight]);
     self = [super initWithFrame: frame];
     if (self) {
-		_bgColor = [[NSColor colorWithCalibratedRed: 0.0 green: 0.0470588 blue: 0.2431372 alpha: 1.0] retain];
-		_fgColor = [[NSColor colorWithCalibratedRed: 0.75 green: 0.75 blue: 0.75 alpha: 1.0] retain];
-
 		_fontWidth = [gConfig cellWidth];
 		_fontHeight = [gConfig cellHeight];
 		
@@ -114,6 +111,36 @@ static NSImage *gLeftImage;
 		[bp release];
 	}
 /**/
+}
+
+- (void) clearScreen: (int) opt {
+	
+}
+
+- (void) extendBottom {
+	[_backedImage lockFocus];
+	[_backedImage compositeToPoint: NSMakePoint(0, (gRow - 1) * _fontHeight) 
+						  fromRect: NSMakeRect(0, 0, gColumn * _fontWidth, (gRow - 1) * _fontHeight) 
+						 operation: NSCompositeCopy];
+
+	[gConfig->_colorTable[0][NUM_COLOR - 1] set];
+	[NSBezierPath fillRect: NSMakeRect(0, (gRow - 1) * _fontHeight, gColumn * _fontWidth, _fontHeight)];
+	[_backedImage unlockFocus];
+	
+	[self setNeedsDisplay: YES];
+}
+
+- (void) extendTop {
+	[_backedImage lockFocus];
+	[_backedImage compositeToPoint: NSMakePoint(0, gRow * _fontHeight) 
+						  fromRect: NSMakeRect(0, _fontHeight, gColumn * _fontWidth, (gRow - 1) * _fontHeight) 
+						 operation: NSCompositeCopy];
+	
+	[gConfig->_colorTable[0][NUM_COLOR - 1] set];
+	[NSBezierPath fillRect: NSMakeRect(0, (gRow - 1) * _fontHeight, gColumn * _fontWidth, _fontHeight)];
+	[_backedImage unlockFocus];
+	
+	[self setNeedsDisplay: YES];
 }
 
 - (void) update {
@@ -257,7 +284,7 @@ static NSImage *gLeftImage;
 		
 	} else if (ch > 0x0080) {
 		origin.y -= 2;
-//#define DRAWFONTBOUNDARYONLY		
+//#define DRAWFONTBOUNDARYONLY
 		
 #ifdef DRAWFONTBOUNDARYONLY		
 		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 2.5, _fontWidth * 2 - 1, _fontHeight - 1);

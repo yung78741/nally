@@ -527,10 +527,5 @@ unsigned short B2U[32768] =
 };
 
 void init_table() {
-	int count = 0;
-	int i;
-	for (i = 0; i < 32768; i++)
-		if (B2U[i])
-			count++;
-	printf("%d\n", count);
+
 }

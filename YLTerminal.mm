@@ -127,11 +127,13 @@ static unsigned short gEmptyAttr;
 					_cursorX--;
 			} else if (c == 0x0A) { // Linefeed 
 				if (_cursorY == _row - 1) {
+					[_delegate update];
+					[_delegate extendBottom];
 					_offset = (_offset + 1) % _row;
 					for (x = 0; x < _column; x++) {
 						GRID(x, _cursorY).byte = '\0';
 						GRID(x, _cursorY).attr.v = gEmptyAttr;
-						[self setAllDirty];
+						_dirty[_cursorY * _column + x] = YES; 
 					}
 				} else {
 					_cursorY++;
@@ -163,13 +165,15 @@ static unsigned short gEmptyAttr;
 				_csArg->clear();
 				_csTemp = 0;
 				_state = TP_CONTROL;
-			} else if (c == 'M') {
+			} else if (c == 'M') { // scroll down
 				if (_cursorY == 0) {
+					[_delegate update];
+					[_delegate extendTop];
 					_offset = (_offset + _row - 1) % _row;
 					for (x = 0; x < _column; x++) {
 						GRID(x, _cursorY).byte = '\0';
 						GRID(x, _cursorY).attr.v = gEmptyAttr;
-						[self setAllDirty];
+						_dirty[_cursorY * _column + x] = YES;
 					}
 				} else {
 					_cursorY--;
@@ -250,7 +254,7 @@ static unsigned short gEmptyAttr;
 						start = _cursorX + (_cursorY * _column);
 					if (_csArg->size() == 1 && _csArg->front() == 1) 
 						end = _cursorX + (_cursorY * _column);
-
+//					[_delegate update];
 					int idx;
 					for (idx = start; idx <= end; idx++) {
 						int memIdx = (idx + _offset * _column) % (_row * _column);

@@ -12,10 +12,7 @@
 @class YLTerminal;
 @class YLTelnet;
 
-@interface YLView : NSView {
-	NSColor *_bgColor;
-	NSColor *_fgColor;
-	
+@interface YLView : NSView {	
 	int _fontWidth;
 	int _fontHeight;
 	
@@ -31,6 +28,7 @@
 - (void)setDataSource:(id)value;
 - (YLTelnet *)telnet;
 - (void)setTelnet:(YLTelnet *)value;
-
-
+- (void) extendBottom ;
+- (void) extendTop ;
+- (void) clearScreen: (int) opt ;
 @end
