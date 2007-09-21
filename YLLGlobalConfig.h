@@ -24,6 +24,10 @@
 	NSColor *_colorTable[2][NUM_COLOR];
 	NSDictionary *_cDictTable[2][NUM_COLOR];
 	NSDictionary *_eDictTable[2][NUM_COLOR];
+
+	ATSUStyle _cATSUStyle[2][NUM_COLOR];
+	ATSUStyle _eATSUStyle[2][NUM_COLOR];
+	ATSUStyle _sATSUStyle[2][NUM_COLOR];
 }
 
 + (YLLGlobalConfig *) sharedInstance;

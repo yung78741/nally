@@ -276,6 +276,7 @@ static int gLinePixels;
 }
 
 - (YLTelnet *)telnet {
+	
     return [[_telnet retain] autorelease];
 }
 

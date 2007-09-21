@@ -286,7 +286,7 @@ static NSImage *gLeftImage;
 		origin.y -= 2;
 //#define DRAWFONTBOUNDARYONLY
 		
-#ifdef DRAWFONTBOUNDARYONLY		
+#ifdef DRAWFONTBOUNDARYONLY
 		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 2.5, _fontWidth * 2 - 1, _fontHeight - 1);
 		[[NSColor whiteColor] set];
 		[NSBezierPath strokeRect: r];
