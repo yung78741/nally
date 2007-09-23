@@ -113,7 +113,7 @@ static NSImage *gLeftImage;
 /**/
 }
 
-- (void) clearScreen: (int) opt {
+- (void) clearScreen: (int) opt atRow: (int) r column: (int) c {
 	
 }
 
@@ -146,100 +146,163 @@ static NSImage *gLeftImage;
 - (void) update {
 	int x, y;
 	[_backedImage lockFocus];
+	CGContextRef myCGContext = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	
+	/* Draw Background */
 	for (y = 0; y < gRow; y++) {
-		[_dataSource updateDoubleByteStateForRow: y];
 		for (x = 0; x < gColumn; x++) {
 			if ([_dataSource isDirtyAtRow: y column: x]) {
 				int startx = x;
 				for (; x < gColumn && [_dataSource isDirtyAtRow:y column:x]; x++) ;
-				[self updateRow: y from: startx to: x];
-				for(x--; x >= startx; x--) 
-					[_dataSource setDirty: NO atRow: y column: x];
+				[self updateBackgroundForRow: y from: startx to: x];
 			}
 		}
 	}
+
+	CGContextSaveGState(myCGContext);
+	CGAffineTransform ctm = CGContextGetCTM(myCGContext);
+	ctm = CGAffineTransformInvert(ctm);
+	CGContextConcatCTM(myCGContext, ctm); // cancel the flip
+
+	/* Draw String row by row */
+	for (y = 0; y < gRow; y++) {
+		[_dataSource updateDoubleByteStateForRow: y];
+		[self drawStringForRow: y context: myCGContext];
+	}		
+	CGContextRestoreGState(myCGContext);
+	
+//	[[NSColor whiteColor] set];
+//	for (y = 0; y < gRow; y++) 
+//		[NSBezierPath strokeLineFromPoint: NSMakePoint(0, y * _fontHeight + 0.5) toPoint: NSMakePoint(gColumn * _fontWidth, y * _fontHeight + 0.5)];
+//	for (x = 0; x < gColumn; x++) 
+//		[NSBezierPath strokeLineFromPoint: NSMakePoint(x * _fontWidth + 0.5, 0) toPoint: NSMakePoint(x * _fontWidth + 0.5, gRow * _fontHeight)];
+		
+	
+	for (y = 0; y < gRow; y++) {
+		for (x = 0; x < gColumn; x++) {
+			[_dataSource setDirty: NO atRow: y column: x];
+		}
+	}
+
 	[_backedImage unlockFocus];
 }
 
-- (void) updateRow: (int) r from: (int) start to: (int) end {
+- (void) drawStringForRow: (int) r context: (CGContextRef) myCGContext {
+	int i, c, x;
+	int start, end;
+	unichar textBuf[gColumn];
+	BOOL isDoubleByte[gColumn];
+	ATSUAttributeTag tags[2];
+	ByteCount sizes[2];
+	ATSUAttributeValuePtr values[2];
+	cell *currRow = [_dataSource cellsOfRow: r];
+
+	for (i = 0; i < gColumn; i++) 
+		isDoubleByte[i] = textBuf[i] = 0x0000;
+
+	for (x = 0; x < gColumn && ![_dataSource isDirtyAtRow: r column: x]; x++) ;
+	start = x;
+	if (start == gColumn) return;
+	
+	for (x = start; x < gColumn; x++) {
+		if (![_dataSource isDirtyAtRow: r column: x]) continue;
+		end = x;
+		int db = (currRow + x)->attr.f.doubleByte;
+		
+		if (db == 0) {
+			textBuf[x] = 0x0000 + (currRow + x)->byte;
+			isDoubleByte[x] = NO;
+		} else if (db == 1) {
+			isDoubleByte[x] = YES;
+			continue;
+		} else if (db == 2) {
+			isDoubleByte[x] = YES;
+			textBuf[x] = B2U[(((currRow + x - 1)->byte) << 8) + ((currRow + x)->byte) - 0x8000];
+			if (x == start) start--;
+		}
+	}
+
+	ATSUTextLayout layout;
+	ATSUCreateTextLayout(&layout);
+	tags[0] = kATSUCGContextTag;
+	sizes[0] = sizeof (CGContextRef);
+	values[0] = &myCGContext;
+	ATSUSetLayoutControls (layout, 1, tags, sizes, values);
+
+	ATSUSetTextPointerLocation(layout, textBuf, start, end - start + 1, gColumn);
+	
+	/* Run-length of the style */
+	c = start;
+	while (c <= end) {
+		int location = c;
+		int length = 0;
+		BOOL db = isDoubleByte[c];
+		
+		attribute currAttr, lastAttr = (currRow + location)->attr;
+		for (; c <= end; c++) {
+			currAttr = (currRow + c)->attr;
+			if (currAttr.v != lastAttr.v || isDoubleByte[c] != db) break;
+		}
+		length = c - location;
+		
+		ATSUStyle style = gConfig->_eATSUStyle[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
+		if (db)
+			style = gConfig->_cATSUStyle[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
+
+		ATSUSetRunStyle(layout, style, location, length);
+	}
+	
+	ATSUDrawText(layout, start, end - start + 1, X2Fix(_fontWidth * start), X2Fix((gRow - r - 1) * _fontHeight + 5));	
+		
+	ATSUDisposeTextLayout(layout);
+}
+
+- (void) updateBackgroundForRow: (int) r from: (int) start to: (int) end {
 	int c;
 	cell *currRow = [_dataSource cellsOfRow: r];
 	NSRect rowRect = NSMakeRect(start * _fontWidth, r * _fontHeight, (end - start) * _fontWidth, _fontHeight);
-//	[[NSColor colorWithCalibratedRed: (float)rand() / RAND_MAX green: (float)rand() / RAND_MAX blue: (float)rand() / RAND_MAX alpha: 1.0] set];
-//	[NSBezierPath fillRect: rowRect];
-//	NSLog(@"%d (%d ~ %d)", r, start, end);
 
 	attribute currAttr, lastAttr = (currRow + start)->attr;
 	int length = 0;
-
+	unsigned int currentBackgroundColor;
+	unsigned int lastBackgroundColor = lastAttr.f.reverse ? lastAttr.f.fgColor : lastAttr.f.bgColor;
+	
+	/* TODO: optimize the number of fillRect method. */
+	/* 
+		for example: 
+		
+		  BBBBBBBBBBBWWWWWWWWWWBBBBBBBBBBB
+		
+		currently, we draw each color segment one by one, like this:
+		
+		1. BBBBBBBBBBB
+		2. BBBBBBBBBBBWWWWWWWWWW
+		3. BBBBBBBBBBBWWWWWWWWWWBBBBBBBBBBB
+		
+		but we can use only two fillRect:
+	 
+		1. BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+		2. BBBBBBBBBBBWWWWWWWWWWBBBBBBBBBBB
+	 
+		If further optimization of background drawing is needed, consider the 2D reduction.
+	 */
 	for (c = start; c <= end; c++) {
-		if (c < end)
+		if (c < end) {
 			currAttr = (currRow + c)->attr;
-		if (currAttr.v != lastAttr.v || c == end) {
+			currentBackgroundColor = currAttr.f.reverse ? currAttr.f.fgColor : currAttr.f.bgColor;
+		}
+		
+		if (currentBackgroundColor != lastBackgroundColor || c == end) {
 			/* Draw Background */
 			NSRect rect = NSMakeRect((c - length) * _fontWidth, r * _fontHeight,
 								  _fontWidth * length, _fontHeight);
-			if (lastAttr.f.reverse)
-				[[gConfig colorAtIndex: lastAttr.f.fgColor hilite: NO] set];
-			else
-				[[gConfig colorAtIndex: lastAttr.f.bgColor hilite: NO] set];
+			[[gConfig colorAtIndex: lastBackgroundColor hilite: NO] set];
 			[NSBezierPath fillRect: rect];
-			
-			/* Draw Foreground */
-			int x;
-			for (x = c - length; x < c; x++) {
-				int db = (currRow + x)->attr.f.doubleByte;
-//				int db = [_dataSource isDoubleByteAtRow: r column: x];
-				
-				int colorIndex = lastAttr.f.reverse?lastAttr.f.bgColor:lastAttr.f.fgColor;
-				
-				/* Draw Underline */
-				if (lastAttr.f.underline) {
-					[[gConfig colorAtIndex: colorIndex hilite: lastAttr.f.bold] set];
-					[NSBezierPath strokeLineFromPoint: NSMakePoint(x * _fontWidth, (r+1) * _fontHeight - 0.5) 
-											  toPoint: NSMakePoint((x+1) * _fontWidth, (r+1) * _fontHeight - 0.5) ];
-				}
-				
-				/* Draw Character */
-				if (db == 1) continue;
-				
-				unichar ch;
-				
-				if (db == 0) { // English
-					ch = (currRow + x)->byte;
-//					ch = [_dataSource charAtRow: r column: x];
-					[self drawChar: ch atPoint: NSMakePoint(x * _fontWidth, r * _fontHeight) 
-					  withAttribute: lastAttr];
-				} else if (db == 2) { // Chinese
-					if (x == start) {
-						rowRect.origin.x -= _fontWidth;
-						rowRect.size.width += _fontWidth;							
-					}
-
-					ch = B2U[(((currRow + x - 1)->byte) << 8) + (currRow + x)->byte - 0x8000];
-//					ch = [_dataSource charAtRow: r column: x - 1];
-
-					[self drawChar: ch atPoint: NSMakePoint((x-1) * _fontWidth, r * _fontHeight) 
-					   withAttribute: lastAttr];
-					
-					if (x == c - length) { // double color
-						attribute prevAttr = [_dataSource attrAtRow: r column: x - 1];
-						
-						[gLeftImage lockFocus];
-						int bgColorIndex = prevAttr.f.reverse ? prevAttr.f.fgColor : prevAttr.f.bgColor;
-						[[gConfig colorAtIndex: bgColorIndex hilite: NO] set];
-						[NSBezierPath fillRect: NSMakeRect(0, 0, _fontWidth, _fontHeight)];
-						[self drawChar: ch atPoint: NSMakePoint(0, 0)
-						   withAttribute: prevAttr];
-						[gLeftImage unlockFocus];
-						[gLeftImage compositeToPoint: NSMakePoint((x-1) * _fontWidth, (r+1) * _fontHeight) operation: NSCompositeCopy];
-					}
-				}
-			}
 			
 			/* finish this segment */
 			length = 1;
 			lastAttr.v = currAttr.v;
+			lastBackgroundColor = currentBackgroundColor;
 		} else {
 			length++;
 		}

@@ -27,7 +27,6 @@
 
 	ATSUStyle _cATSUStyle[2][NUM_COLOR];
 	ATSUStyle _eATSUStyle[2][NUM_COLOR];
-	ATSUStyle _sATSUStyle[2][NUM_COLOR];
 }
 
 + (YLLGlobalConfig *) sharedInstance;

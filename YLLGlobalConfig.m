@@ -72,14 +72,13 @@ static YLLGlobalConfig *sSharedInstance;
 		
 		int i, j;
 		ATSUFontID cATSUFontID, eATSUFontID, sATSUFontID;
-		char *cATSUFontName = "STHeiti", *eATSUFontName = "Monaco", *sATSUFontName = "Apple Symbols";
+		char *cATSUFontName = "STHeiti", *eATSUFontName = "Monaco";
 		ATSUAttributeTag		tags[2];
 		ByteCount				sizes[2];
 		ATSUAttributeValuePtr	values[2];
 		
 		ATSUFindFontFromName(cATSUFontName, strlen(cATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &cATSUFontID);
 		ATSUFindFontFromName(eATSUFontName, strlen(eATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &eATSUFontID);
-		ATSUFindFontFromName(sATSUFontName, strlen(sATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &sATSUFontID);
 
 		for (i = 0; i < NUM_COLOR; i++) 
 			for (j = 0; j < 2; j++) {
@@ -97,7 +96,7 @@ static YLLGlobalConfig *sSharedInstance;
 				ATSUSetAttributes(_cATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Size */
-				Fixed pointSize = Long2Fix(24);
+				Fixed pointSize = Long2Fix(20);
 				tags[0] = kATSUSizeTag;
 				sizes[0] = sizeof(Fixed);
 				values[0] = &pointSize;
@@ -109,13 +108,13 @@ static YLLGlobalConfig *sSharedInstance;
 				color.green = [_colorTable[j][i] greenComponent];
 				color.blue = [_colorTable[j][i] blueComponent];
 				color.alpha = 1.0;
-				tags[0] = kATSUColorTag;
+				tags[0] = kATSURGBAlphaColorTag;
 				sizes[0] = sizeof(ATSURGBAlphaColor);
 				values[0] = &color;
 				ATSUSetAttributes(_cATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Fixed-Width */
-				ATSUTextMeasurement glyphWidth = Long2Fix(24);
+				ATSUTextMeasurement glyphWidth = Long2Fix(12);
 				tags[0] = kATSUImposeWidthTag;
 				sizes[0] = sizeof(ATSUTextMeasurement);
 				values[0] = &glyphWidth;
@@ -130,7 +129,7 @@ static YLLGlobalConfig *sSharedInstance;
 				ATSUSetAttributes(_eATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Size */
-				pointSize = Long2Fix(24);
+				pointSize = Long2Fix(18);
 				tags[0] = kATSUSizeTag;
 				sizes[0] = sizeof(Fixed);
 				values[0] = &pointSize;
@@ -141,51 +140,18 @@ static YLLGlobalConfig *sSharedInstance;
 				color.green = [_colorTable[j][i] greenComponent];
 				color.blue = [_colorTable[j][i] blueComponent];
 				color.alpha = 1.0;
-				tags[0] = kATSUColorTag;
+				tags[0] = kATSURGBAlphaColorTag;
 				sizes[0] = sizeof(ATSURGBAlphaColor);
 				values[0] = &color;
 				ATSUSetAttributes(_eATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Fixed-Width */
-				glyphWidth = Long2Fix(24);
+				glyphWidth = Long2Fix(12);
 				tags[0] = kATSUImposeWidthTag;
 				sizes[0] = sizeof(ATSUTextMeasurement);
 				values[0] = &glyphWidth;
 				ATSUSetAttributes(_eATSUStyle[j][i], 1, tags, sizes, values);
-				
-				/* ---------- Symbol Style ---------- */
-				ATSUCreateStyle( &(_sATSUStyle[j][i]));
-				/* Font */
-				tags[0] = kATSUFontTag;
-				sizes[0] = sizeof(ATSUFontID);
-				values[0] = &eATSUFontID;
-				ATSUSetAttributes(_sATSUStyle[j][i], 1, tags, sizes, values);
-				
-				/* Size */
-				pointSize = Long2Fix(24);
-				tags[0] = kATSUSizeTag;
-				sizes[0] = sizeof(Fixed);
-				values[0] = &pointSize;
-				ATSUSetAttributes(_sATSUStyle[j][i], 1, tags, sizes, values);
-				
-				/* Color */
-				color.red = [_colorTable[j][i] redComponent];
-				color.green = [_colorTable[j][i] greenComponent];
-				color.blue = [_colorTable[j][i] blueComponent];
-				color.alpha = 1.0;
-				tags[0] = kATSUColorTag;
-				sizes[0] = sizeof(ATSURGBAlphaColor);
-				values[0] = &color;
-				ATSUSetAttributes(_sATSUStyle[j][i], 1, tags, sizes, values);
-				
-				/* Fixed-Width */
-				glyphWidth = Long2Fix(24);
-				tags[0] = kATSUImposeWidthTag;
-				sizes[0] = sizeof(ATSUTextMeasurement);
-				values[0] = &glyphWidth;
-				ATSUSetAttributes(_sATSUStyle[j][i], 1, tags, sizes, values);				
 			}
-		
 	}
 	return sSharedInstance;
 }
