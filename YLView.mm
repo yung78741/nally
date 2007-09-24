@@ -163,6 +163,7 @@ static NSImage *gLeftImage;
 	CGAffineTransform ctm = CGContextGetCTM(myCGContext);
 	ctm = CGAffineTransformInvert(ctm);
 	CGContextConcatCTM(myCGContext, ctm); // cancel the flip
+	CGContextSetShouldSmoothFonts(myCGContext, NO);
 
 	/* Draw String row by row */
 	for (y = 0; y < gRow; y++) {
@@ -198,7 +199,7 @@ static NSImage *gLeftImage;
 	cell *currRow = [_dataSource cellsOfRow: r];
 
 	for (i = 0; i < gColumn; i++) 
-		isDoubleByte[i] = textBuf[i] = 0x0000;
+		isDoubleByte[i] = textBuf[i] = 0x0020;
 
 	for (x = 0; x < gColumn && ![_dataSource isDirtyAtRow: r column: x]; x++) ;
 	start = x;

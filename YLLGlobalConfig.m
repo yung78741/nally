@@ -71,7 +71,7 @@ static YLLGlobalConfig *sSharedInstance;
 		_bitmapColorTable[1][9] = 0x00000000;
 		
 		int i, j;
-		ATSUFontID cATSUFontID, eATSUFontID, sATSUFontID;
+		ATSUFontID cATSUFontID, eATSUFontID;
 		char *cATSUFontName = "STHeiti", *eATSUFontName = "Monaco";
 		ATSUAttributeTag		tags[2];
 		ByteCount				sizes[2];
@@ -96,7 +96,7 @@ static YLLGlobalConfig *sSharedInstance;
 				ATSUSetAttributes(_cATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Size */
-				Fixed pointSize = Long2Fix(20);
+				Fixed pointSize = Long2Fix(22);
 				tags[0] = kATSUSizeTag;
 				sizes[0] = sizeof(Fixed);
 				values[0] = &pointSize;

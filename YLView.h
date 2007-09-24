@@ -22,7 +22,6 @@
 	YLTelnet *_telnet;
 }
 
-- (void) updateRow: (int) r from: (int) start to: (int) end ;
 - (void)drawChar: (unichar) ch atPoint: (NSPoint) origin withAttribute: (attribute) attr ;
 - (id)dataSource;
 - (void)setDataSource:(id)value;
@@ -30,5 +29,8 @@
 - (void)setTelnet:(YLTelnet *)value;
 - (void) extendBottom ;
 - (void) extendTop ;
-- (void) clearScreen: (int) opt ;
+- (void) clearScreen: (int) opt atRow: (int) r column: (int) c ;
+
+- (void) drawStringForRow: (int) r context: (CGContextRef) myCGContext ;
+- (void) updateBackgroundForRow: (int) r from: (int) start to: (int) end ;
 @end
