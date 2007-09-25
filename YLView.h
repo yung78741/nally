@@ -22,7 +22,7 @@
 	YLTelnet *_telnet;
 }
 
-- (void)drawChar: (unichar) ch atPoint: (NSPoint) origin withAttribute: (attribute) attr ;
+- (void) drawSpecialSymbol: (unichar) ch forRow: (int) r column: (int) c leftAttribute: (attribute) attr1 rightAttribute: (attribute) attr2 ;
 - (id)dataSource;
 - (void)setDataSource:(id)value;
 - (YLTelnet *)telnet;

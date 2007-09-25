@@ -23,12 +23,12 @@
 	[_telnetView setTelnet: telnet];
 	
 	[telnet connectToAddress: @"ptt.cc" port: 23];
-//	_updateViewTimer = [NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector: @selector(tick:) userInfo: nil repeats: YES];
+	_updateViewTimer = [NSTimer scheduledTimerWithTimeInterval: 0.0666 target: self selector: @selector(tick:) userInfo: nil repeats: YES];
 }
 
 - (void) tick: (NSTimer *) t {
 //	fprintf(stderr, ".");
-//	[_telnetView update];
+	[_telnetView update];
 }
 
 @end

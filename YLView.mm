@@ -19,6 +19,18 @@ static NSImage *gLeftImage;
 static CGSize *gSingleAdvance;
 static CGSize *gDoubleAdvance;
 
+BOOL isSpecialSymbol(unichar ch) {
+	if (ch == 0x25FC)  // ◼ BLACK SQUARE
+		return YES;
+	if (ch >= 0x2581 && ch <= 0x2588) // BLOCK ▁▂▃▄▅▆▇█
+		return YES;
+	if (ch >= 0x2589 && ch <= 0x258F) // BLOCK ▉▊▋▌▍▎▏
+		return YES;
+	if (ch >= 0x25E2 && ch <= 0x25E5) // TRIANGLE ◢◣◤◥
+		return YES;
+	return NO;
+}
+
 @implementation YLView
 
 - (id)initWithFrame:(NSRect)frame {
@@ -226,13 +238,24 @@ static CGSize *gDoubleAdvance;
 		} else if (db == 1) {
 			continue;
 		} else if (db == 2) {
-			isDoubleByte[bufLength] = YES;
-			textBuf[bufLength] = B2U[(((currRow + x - 1)->byte) << 8) + ((currRow + x)->byte) - 0x8000];
-			bufIndex[bufLength] = x;
-			position[bufLength] = CGPointMake((x - 1) * _fontWidth + 2.0, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + 2.0);
-			bufLength++;
+			unichar ch = B2U[(((currRow + x - 1)->byte) << 8) + ((currRow + x)->byte) - 0x8000];
+			if (isSpecialSymbol(ch)) {
+				[self drawSpecialSymbol: ch forRow: r column: (x - 1) leftAttribute: (currRow + x - 1)->attr rightAttribute: (currRow + x)->attr];
+				isDoubleByte[bufLength] = NO;
+				isDoubleByte[bufLength + 1] = NO;
+				textBuf[bufLength] = 0x3000;
+				position[bufLength] = CGPointMake((x - 1) * _fontWidth + 2.0, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + 1.0);
+				bufIndex[bufLength] = x;
+				bufLength ++;
+			} else {
+				isDoubleByte[bufLength] = YES;
+				textBuf[bufLength] = ch;
+				bufIndex[bufLength] = x;
+				position[bufLength] = CGPointMake((x - 1) * _fontWidth + 2.0, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + 2.0);
+				bufLength++;
+			}
 			if (x == start)
-				[self setNeedsDisplayInRect: NSMakeRect((x - 1) * _fontWidth, (gRow - 1 - r) * _fontHeight, _fontWidth, _fontHeight)];
+				[self setNeedsDisplayInRect: NSMakeRect((x - 1) * _fontWidth, (gRow - 1 - r) * _fontHeight, _fontWidth, _fontHeight)];				
 		}
 	}
 	
@@ -376,62 +399,52 @@ static CGSize *gDoubleAdvance;
 	[self setNeedsDisplayInRect: rowRect];
 }
 
-- (void) drawChar: (unichar) ch atPoint: (NSPoint) origin withAttribute: (attribute) attr  {
-	int colorIndex = attr.f.reverse ? attr.f.bgColor : attr.f.fgColor;
-	NSColor *color = [gConfig colorAtIndex: colorIndex hilite: attr.f.bold];
-	if (ch <= 0x0020) {
-		return;
-	} else if (ch == 0x25FC) { // ◼ BLACK SQUARE
+- (void) drawSpecialSymbol: (unichar) ch forRow: (int) r column: (int) c leftAttribute: (attribute) attr1 rightAttribute: (attribute) attr2 {
+	int colorIndex1 = attr1.f.reverse ? attr1.f.bgColor : attr1.f.fgColor;
+	int colorIndex2 = attr2.f.reverse ? attr2.f.bgColor : attr2.f.fgColor;
+	NSPoint origin = NSMakePoint(c * _fontWidth, (gRow - 1 - r) * _fontHeight);
+
+	NSAffineTransform *xform = [NSAffineTransform transform]; 
+	[xform translateXBy: origin.x yBy: origin.y];
+	[xform concat];
+	
+	if (YES) {//colorIndex1 == colorIndex2 && attr1.f.bold == attr2.f.bold) {
+		NSColor *color = [gConfig colorAtIndex: colorIndex1 hilite: attr1.f.bold];
 		
-	} else if (ch >= 0x2581 && ch <= 0x2588) { // BLOCK ▁▂▃▄▅▆▇█
-		NSRect r = NSMakeRect(origin.x, origin.y + _fontHeight * (0x2588 - ch) / 8, 2 * _fontWidth, _fontHeight * (ch - 0x2580) / 8);
-		[color set];
-		[NSBezierPath fillRect: r];
-	} else if (ch >= 0x2589 && ch <= 0x258F) { // BLOCK ▉▊▋▌▍▎▏
-		NSRect r = NSMakeRect(origin.x, origin.y, 2 * _fontWidth * (0x2590 - ch) / 8, _fontHeight);
-		[color set];
-		[NSBezierPath fillRect: r];		
-	} else if (ch >= 0x25E2 && ch <= 0x25E5) { // TRIANGLE ◢◣◤◥
-		NSPoint pts[4] = {	NSMakePoint(origin.x + 2 * _fontWidth, origin.y), 
-							NSMakePoint(origin.x + 2 * _fontWidth, origin.y + _fontHeight), 
-							NSMakePoint(origin.x, origin.y + _fontHeight), 
-							NSMakePoint(origin.x, origin.y) };
-		int base = ch - 0x25E2;
-		NSBezierPath *bp = [[NSBezierPath alloc] init];
-		[bp moveToPoint: pts[base]];
-		int i;
-		for (i = 1; i < 3; i++)	
-			[bp lineToPoint: pts[(base + i) % 4]];
-		[bp closePath];
-		[color set];
-		[bp fill];
-		[bp release];
-	} else if (ch == 0x0) {
-	} else if (ch == 0x0) {
-	} else if (ch == 0x0) {
+		if (ch == 0x25FC) { // ◼ BLACK SQUARE
+			
+		} else if (ch >= 0x2581 && ch <= 0x2588) { // BLOCK ▁▂▃▄▅▆▇█
+			NSRect rect = NSMakeRect(0.0, 0.0, 2 * _fontWidth, _fontHeight * (ch - 0x2580) / 8);
+			[color set];
+			[NSBezierPath fillRect: rect];
+		} else if (ch >= 0x2589 && ch <= 0x258F) { // BLOCK ▉▊▋▌▍▎▏
+			NSRect rect = NSMakeRect(0.0, 0.0, 2 * _fontWidth * (0x2590 - ch) / 8, _fontHeight);
+			[color set];
+			[NSBezierPath fillRect: rect];		
+		} else if (ch >= 0x25E2 && ch <= 0x25E5) { // TRIANGLE ◢◣◤◥
+			NSPoint pts[4] = {	
+				NSMakePoint(2 * _fontWidth, _fontHeight), 
+				NSMakePoint(2 * _fontWidth, 0.0), 
+				NSMakePoint(0.0, 0.0), 
+				NSMakePoint(0.0, _fontHeight)
+			};
+			int base = ch - 0x25E2;
+			NSBezierPath *bp = [[NSBezierPath alloc] init];
+			[bp moveToPoint: pts[base]];
+			int i;
+			for (i = 1; i < 3; i++)	
+				[bp lineToPoint: pts[(base + i) % 4]];
+			[bp closePath];
+			[color set];
+			[bp fill];
+			[bp release];
+		} else if (ch == 0x0) {
+		}
+	} else { // double color
 		
-	} else if (ch > 0x0080) {
-		origin.y -= 2;
-//#define DRAWFONTBOUNDARYONLY
-		
-#ifdef DRAWFONTBOUNDARYONLY
-		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 2.5, _fontWidth * 2 - 1, _fontHeight - 1);
-		[[NSColor whiteColor] set];
-		[NSBezierPath strokeRect: r];
-#else
-		NSString *str = [NSString stringWithCharacters: &ch length: 1];
-		[str drawAtPoint: origin withAttributes: [gConfig cFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
-#endif
-	} else {
-#ifdef DRAWFONTBOUNDARYONLY		
-		NSRect r = NSMakeRect(origin.x + 0.5, origin.y + 0.5, _fontWidth - 1, _fontHeight - 1);
-		[[NSColor yellowColor] set];
-		[NSBezierPath strokeRect: r];
-#else
-		NSString *str = [NSString stringWithCharacters: &ch length: 1];
-		[str drawAtPoint: origin withAttributes: [gConfig eFontAttributeForColorIndex: colorIndex hilite: attr.f.bold]];
-#endif
 	}
+	[xform invert];
+	[xform concat];
 }
 
 

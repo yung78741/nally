@@ -325,7 +325,7 @@ static unsigned short gEmptyAttr;
 			}
 		}
 	}
-	[_delegate update];
+//	[_delegate update];
 }
 
 # pragma mark -
