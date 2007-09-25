@@ -16,6 +16,8 @@ static YLLGlobalConfig *gConfig;
 static int gRow;
 static int gColumn;
 static NSImage *gLeftImage;
+static CGSize *gSingleAdvance;
+static CGSize *gDoubleAdvance;
 
 @implementation YLView
 
@@ -32,7 +34,7 @@ static NSImage *gLeftImage;
 		
 		
 		_backedImage = [[NSImage alloc] initWithSize: frame.size];
-		[_backedImage setFlipped: YES];
+		[_backedImage setFlipped: NO];
 		[_backedImage lockFocus];
 		[[gConfig colorAtIndex: 9 hilite: NO] set];
 		[NSBezierPath fillRect: NSMakeRect(0, 0, frame.size.width, frame.size.height)];
@@ -42,6 +44,14 @@ static NSImage *gLeftImage;
 			gLeftImage = [[NSImage alloc] initWithSize: NSMakeSize(_fontWidth, _fontHeight)];
 			[gLeftImage setFlipped: YES];			
 		}
+		gSingleAdvance = (CGSize *) malloc(sizeof(CGSize) * gColumn);
+		gDoubleAdvance = (CGSize *) malloc(sizeof(CGSize) * gColumn);
+		int i;
+		for (i = 0; i < gColumn; i++) {
+			gSingleAdvance[i] = CGSizeMake(_fontWidth * 1.0, 0.0);
+			gDoubleAdvance[i] = CGSizeMake(_fontWidth * 2.0, 0.0);
+		}
+		
     }
     return self;
 }
@@ -88,51 +98,56 @@ static NSImage *gLeftImage;
 - (void)drawRect:(NSRect)rect {
 	NSRect imgRect = rect;
 	imgRect.origin.y = (_fontHeight * gRow) - rect.origin.y - rect.size.height;
-	[_backedImage compositeToPoint: NSMakePoint(rect.origin.x, rect.origin.y + rect.size.height)
-						  fromRect: imgRect
+	[_backedImage compositeToPoint: rect.origin
+						  fromRect: rect
 						 operation: NSCompositeCopy];
-/*
-	int x, y;
-	for (x = 0; x < [gConfig column]; x++) {
-		NSBezierPath *bp = [NSBezierPath new];
-		[bp moveToPoint: NSMakePoint(x * _fontWidth, 0)];
-		[bp lineToPoint: NSMakePoint(x * _fontWidth, [gConfig row] * _fontHeight)];
-		[[NSColor greenColor] set];
-		[bp stroke];
-		[bp release];
-	}
+//	int x, y;
+//	[[NSColor whiteColor] set];
+//	for (y = 0; y < gRow; y++) 
+//		[NSBezierPath strokeLineFromPoint: NSMakePoint(0, y * _fontHeight + 0.5) toPoint: NSMakePoint(gColumn * _fontWidth, y * _fontHeight + 0.5)];
+//	for (x = 0; x < gColumn; x++) 
+//		[NSBezierPath strokeLineFromPoint: NSMakePoint(x * _fontWidth + 0.5, 0) toPoint: NSMakePoint(x * _fontWidth + 0.5, gRow * _fontHeight)];	
 
-	for (y = 0; y < [gConfig row]; y++) {
-		NSBezierPath *bp = [NSBezierPath new];
-		[bp moveToPoint: NSMakePoint(0, y * _fontHeight)];
-		[bp lineToPoint: NSMakePoint([gConfig column] * _fontWidth,  y * _fontHeight)];
-		[[NSColor greenColor] set];
-		[bp stroke];
-		[bp release];
-	}
-/**/
 }
 
 - (void) clearScreen: (int) opt atRow: (int) r column: (int) c {
 	
 }
 
+/* 
+	Extend Bottom:
+ 
+		AAAAAAAAAAA			BBBBBBBBBBB
+		BBBBBBBBBBB			CCCCCCCCCCC
+		CCCCCCCCCCC   ->	DDDDDDDDDDD
+		DDDDDDDDDDD			...........
+ 
+ */
 - (void) extendBottom {
 	[_backedImage lockFocus];
-	[_backedImage compositeToPoint: NSMakePoint(0, (gRow - 1) * _fontHeight) 
+	[_backedImage compositeToPoint: NSMakePoint(0, _fontHeight) 
 						  fromRect: NSMakeRect(0, 0, gColumn * _fontWidth, (gRow - 1) * _fontHeight) 
 						 operation: NSCompositeCopy];
 
 	[gConfig->_colorTable[0][NUM_COLOR - 1] set];
-	[NSBezierPath fillRect: NSMakeRect(0, (gRow - 1) * _fontHeight, gColumn * _fontWidth, _fontHeight)];
+	[NSBezierPath fillRect: NSMakeRect(0, 0, gColumn * _fontWidth, _fontHeight)];
 	[_backedImage unlockFocus];
 	
 	[self setNeedsDisplay: YES];
 }
 
+
+/* 
+	Extend Top:
+ 
+		AAAAAAAAAAA			...........
+		BBBBBBBBBBB			AAAAAAAAAAA
+		CCCCCCCCCCC   ->	BBBBBBBBBBB
+		DDDDDDDDDDD			CCCCCCCCCCC
+ */
 - (void) extendTop {
 	[_backedImage lockFocus];
-	[_backedImage compositeToPoint: NSMakePoint(0, gRow * _fontHeight) 
+	[_backedImage compositeToPoint: NSMakePoint(0, 0) 
 						  fromRect: NSMakeRect(0, _fontHeight, gColumn * _fontWidth, (gRow - 1) * _fontHeight) 
 						 operation: NSCompositeCopy];
 	
@@ -147,6 +162,7 @@ static NSImage *gLeftImage;
 	int x, y;
 	[_backedImage lockFocus];
 	CGContextRef myCGContext = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+	puts("update");
 	
 	/* Draw Background */
 	for (y = 0; y < gRow; y++) {
@@ -158,11 +174,7 @@ static NSImage *gLeftImage;
 			}
 		}
 	}
-
 	CGContextSaveGState(myCGContext);
-	CGAffineTransform ctm = CGContextGetCTM(myCGContext);
-	ctm = CGAffineTransformInvert(ctm);
-	CGContextConcatCTM(myCGContext, ctm); // cancel the flip
 	CGContextSetShouldSmoothFonts(myCGContext, NO);
 
 	/* Draw String row by row */
@@ -171,13 +183,6 @@ static NSImage *gLeftImage;
 		[self drawStringForRow: y context: myCGContext];
 	}		
 	CGContextRestoreGState(myCGContext);
-	
-//	[[NSColor whiteColor] set];
-//	for (y = 0; y < gRow; y++) 
-//		[NSBezierPath strokeLineFromPoint: NSMakePoint(0, y * _fontHeight + 0.5) toPoint: NSMakePoint(gColumn * _fontWidth, y * _fontHeight + 0.5)];
-//	for (x = 0; x < gColumn; x++) 
-//		[NSBezierPath strokeLineFromPoint: NSMakePoint(x * _fontWidth + 0.5, 0) toPoint: NSMakePoint(x * _fontWidth + 0.5, gRow * _fontHeight)];
-		
 	
 	for (y = 0; y < gRow; y++) {
 		for (x = 0; x < gColumn; x++) {
@@ -193,13 +198,15 @@ static NSImage *gLeftImage;
 	int start, end;
 	unichar textBuf[gColumn];
 	BOOL isDoubleByte[gColumn];
-	ATSUAttributeTag tags[2];
-	ByteCount sizes[2];
-	ATSUAttributeValuePtr values[2];
+	int bufIndex[gColumn];
+	int runLength[gColumn];
+	CGPoint position[gColumn];
+	int bufLength = 0;
+
 	cell *currRow = [_dataSource cellsOfRow: r];
 
 	for (i = 0; i < gColumn; i++) 
-		isDoubleByte[i] = textBuf[i] = 0x0020;
+		isDoubleByte[i] = textBuf[i] = runLength[i] = 0;
 
 	for (x = 0; x < gColumn && ![_dataSource isDirtyAtRow: r column: x]; x++) ;
 	start = x;
@@ -209,59 +216,116 @@ static NSImage *gLeftImage;
 		if (![_dataSource isDirtyAtRow: r column: x]) continue;
 		end = x;
 		int db = (currRow + x)->attr.f.doubleByte;
-		
+
 		if (db == 0) {
-			textBuf[x] = 0x0000 + (currRow + x)->byte;
-			isDoubleByte[x] = NO;
+			isDoubleByte[bufLength] = NO;
+			textBuf[bufLength] = 0x0000 + (currRow + x)->byte;
+			bufIndex[bufLength] = x;
+			position[bufLength] = CGPointMake(x * _fontWidth + 1.0, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_eCTFont) + 2.0);
+			bufLength++;
 		} else if (db == 1) {
-			isDoubleByte[x] = YES;
 			continue;
 		} else if (db == 2) {
-			isDoubleByte[x] = YES;
-			textBuf[x] = B2U[(((currRow + x - 1)->byte) << 8) + ((currRow + x)->byte) - 0x8000];
-			if (x == start) start--;
+			isDoubleByte[bufLength] = YES;
+			textBuf[bufLength] = B2U[(((currRow + x - 1)->byte) << 8) + ((currRow + x)->byte) - 0x8000];
+			bufIndex[bufLength] = x;
+			position[bufLength] = CGPointMake((x - 1) * _fontWidth + 2.0, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + 2.0);
+			bufLength++;
+			if (x == start)
+				[self setNeedsDisplayInRect: NSMakeRect((x - 1) * _fontWidth, (gRow - 1 - r) * _fontHeight, _fontWidth, _fontHeight)];
 		}
 	}
-
-	ATSUTextLayout layout;
-	ATSUCreateTextLayout(&layout);
-	tags[0] = kATSUCGContextTag;
-	sizes[0] = sizeof (CGContextRef);
-	values[0] = &myCGContext;
-	ATSUSetLayoutControls (layout, 1, tags, sizes, values);
-
-	ATSUSetTextPointerLocation(layout, textBuf, start, end - start + 1, gColumn);
 	
+	CFStringRef str = CFStringCreateWithCharacters(kCFAllocatorDefault, textBuf, bufLength);
+	CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, str, NULL);
+	CFMutableAttributedStringRef mutableAttributedString = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, 0, attributedString);
+	CFRelease(str);
+	CFRelease(attributedString);
+		
 	/* Run-length of the style */
-	c = start;
-	while (c <= end) {
+	c = 0;
+	while (c < bufLength) {
 		int location = c;
 		int length = 0;
 		BOOL db = isDoubleByte[c];
-		
-		attribute currAttr, lastAttr = (currRow + location)->attr;
-		for (; c <= end; c++) {
-			currAttr = (currRow + c)->attr;
+
+		attribute currAttr, lastAttr = (currRow + bufIndex[c])->attr;
+		for (; c < bufLength; c++) {
+			currAttr = (currRow + bufIndex[c])->attr;
 			if (currAttr.v != lastAttr.v || isDoubleByte[c] != db) break;
 		}
 		length = c - location;
 		
-		ATSUStyle style = gConfig->_eATSUStyle[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
-		if (db)
-			style = gConfig->_cATSUStyle[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
-
-		ATSUSetRunStyle(layout, style, location, length);
+		CFDictionaryRef attr;
+		if (db) 
+			attr = gConfig->_cCTAttribute[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
+		else
+			attr = gConfig->_eCTAttribute[lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
+		
+		CFAttributedStringSetAttributes(mutableAttributedString, CFRangeMake(location, length), attr, YES);
 	}
 	
-	ATSUDrawText(layout, start, end - start + 1, X2Fix(_fontWidth * start), X2Fix((gRow - r - 1) * _fontHeight + 5));	
+	CTLineRef line = CTLineCreateWithAttributedString(mutableAttributedString);
+	CFRelease(mutableAttributedString);
+	
+	CFIndex glyphCount = CTLineGetGlyphCount(line);
+	if (glyphCount == 0) {
+		CFRelease(line);
+		return;
+	}
+	
+	CFArrayRef runArray = CTLineGetGlyphRuns(line);
+	CFIndex runCount = CFArrayGetCount(runArray);
+	CFIndex glyphOffset = 0;
+	
+	CFIndex runIndex = 0;
+
+	for (; runIndex < runCount; runIndex++) {
+		CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex(runArray,  runIndex);
+		CFIndex runGlyphCount = CTRunGetGlyphCount(run);
+		CFIndex runGlyphIndex = 0;
+
+		CFDictionaryRef attrDict = CTRunGetAttributes(run);
+		CTFontRef runFont = (CTFontRef)CFDictionaryGetValue(attrDict,  kCTFontAttributeName);
+		CGFontRef cgFont = CTFontCopyGraphicsFont(runFont, NULL);
+		NSColor *runColor = (NSColor *) CFDictionaryGetValue(attrDict, kCTForegroundColorAttributeName);
 		
-	ATSUDisposeTextLayout(layout);
+		CGContextSetFont(myCGContext, cgFont);
+		CGContextSetFontSize(myCGContext, CTFontGetSize(runFont));
+		CGContextSetRGBFillColor(myCGContext, 
+								 [runColor redComponent], 
+								 [runColor greenComponent], 
+								 [runColor blueComponent], 
+								 1.0);
+		
+		CGGlyph glyph[gColumn];
+		CFRange glyphRange = CFRangeMake(runGlyphIndex, runGlyphCount);
+		CTRunGetGlyphs(run, glyphRange, glyph);
+
+		CGAffineTransform textMatrix = CTRunGetTextMatrix(run);
+		textMatrix.tx = position[glyphOffset].x;
+		textMatrix.ty = position[glyphOffset].y;
+		CGContextSetTextMatrix(myCGContext, textMatrix);
+		
+		CGContextShowGlyphsWithAdvances(myCGContext, glyph, isDoubleByte[glyphOffset] ? gDoubleAdvance : gSingleAdvance, runGlyphCount);
+		
+/*		for (; runGlyphIndex < runGlyphCount; runGlyphIndex++) {
+			CFRange glyphRange = CFRangeMake(runGlyphIndex, 1);
+			CGGlyph glyph;
+			CTRunGetGlyphs(run, glyphRange, &glyph);
+			CGContextShowGlyphsAtPoint(myCGContext, position[runGlyphIndex + glyphOffset].x, position[runGlyphIndex + glyphOffset].y, &glyph, 1);
+		}*/
+		glyphOffset += runGlyphCount;
+		CFRelease(cgFont);
+	}
+	
+	CFRelease(line);
 }
 
 - (void) updateBackgroundForRow: (int) r from: (int) start to: (int) end {
 	int c;
 	cell *currRow = [_dataSource cellsOfRow: r];
-	NSRect rowRect = NSMakeRect(start * _fontWidth, r * _fontHeight, (end - start) * _fontWidth, _fontHeight);
+	NSRect rowRect = NSMakeRect(start * _fontWidth, (gRow - 1 - r) * _fontHeight, (end - start) * _fontWidth, _fontHeight);
 
 	attribute currAttr, lastAttr = (currRow + start)->attr;
 	int length = 0;
@@ -295,7 +359,7 @@ static NSImage *gLeftImage;
 		
 		if (currentBackgroundColor != lastBackgroundColor || c == end) {
 			/* Draw Background */
-			NSRect rect = NSMakeRect((c - length) * _fontWidth, r * _fontHeight,
+			NSRect rect = NSMakeRect((c - length) * _fontWidth, (gRow - 1 - r) * _fontHeight,
 								  _fontWidth * length, _fontHeight);
 			[[gConfig colorAtIndex: lastBackgroundColor hilite: NO] set];
 			[NSBezierPath fillRect: rect];
@@ -375,7 +439,7 @@ static NSImage *gLeftImage;
 #pragma mark Override
 
 - (BOOL) isFlipped {
-	return YES;
+	return NO;
 }
 
 - (BOOL) isOpaque {

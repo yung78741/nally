@@ -80,6 +80,11 @@ static YLLGlobalConfig *sSharedInstance;
 		ATSUFindFontFromName(cATSUFontName, strlen(cATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &cATSUFontID);
 		ATSUFindFontFromName(eATSUFontName, strlen(eATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &eATSUFontID);
 
+		_cCTFont = CTFontCreateWithPlatformFont(cATSUFontID, 22.0, NULL, NULL);
+		_eCTFont = CTFontCreateWithPlatformFont(eATSUFontID, 18.0, NULL, NULL);
+		_cCGFont = CTFontCopyGraphicsFont(_cCTFont, NULL);
+		_eCGFont = CTFontCopyGraphicsFont(_eCTFont, NULL);
+		
 		for (i = 0; i < NUM_COLOR; i++) 
 			for (j = 0; j < 2; j++) {
 				_cDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
@@ -87,6 +92,23 @@ static YLLGlobalConfig *sSharedInstance;
 				_eDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
 									  _eFont, NSFontAttributeName, nil] retain];
 
+				
+				CFStringRef cfKeys[] = {kCTFontAttributeName, kCTForegroundColorAttributeName};
+				CFTypeRef cfValues[] = {_cCTFont, _colorTable[j][i]};
+				_cCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
+														 (const void **) cfKeys, 
+														 (const void **) cfValues, 
+														 2, 
+														 &kCFTypeDictionaryKeyCallBacks, 
+														 &kCFTypeDictionaryValueCallBacks);
+				cfValues[0] = _eCTFont;
+				_eCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
+														 (const void **) cfKeys, 
+														 (const void **) cfValues, 
+														 2, 
+														 &kCFTypeDictionaryKeyCallBacks, 
+														 &kCFTypeDictionaryValueCallBacks);
+				
 				/* ---------- Chinese Style ---------- */
 				ATSUCreateStyle( &(_cATSUStyle[j][i]));
 				/* Font */
@@ -152,6 +174,7 @@ static YLLGlobalConfig *sSharedInstance;
 				values[0] = &glyphWidth;
 				ATSUSetAttributes(_eATSUStyle[j][i], 1, tags, sizes, values);
 			}
+		
 	}
 	return sSharedInstance;
 }
