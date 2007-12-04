@@ -7,7 +7,7 @@
 //
 
 #import "YLApplication.h"
-
+#import "YLController.h"
 
 @implementation YLApplication
 - (void) sendEvent: (NSEvent *) event {
@@ -44,8 +44,15 @@
                   charactersIgnoringModifiers: leftString 
                                     isARepeat: [event isARepeat] 
                                       keyCode:[event keyCode]];
+        } else if (([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask && 
+                   ([event modifierFlags] & NSAlternateKeyMask) == 0 && 
+                   ([event modifierFlags] & NSControlKeyMask) == 0 && 
+                   ([event modifierFlags] & NSShiftKeyMask) == 0 && 
+                   [[event characters] intValue] > 0 && 
+                   [[event characters] intValue] < 10) {
+            [_controller selectTabNumber: [[event characters] intValue]];
+            return;
         }
-        
     }
     
     [super sendEvent:event];
