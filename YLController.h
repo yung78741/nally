@@ -41,9 +41,6 @@
 - (IBAction) closeSites: (id) sender;
 - (IBAction) addSites: (id) sender;
 - (IBAction) showHiddenText: (id) sender;
-- (IBAction) openPreferencesWindow: (id) sender ;
-- (void) newConnectionToAddress: (NSString *) addr name: (NSString *) name;
-- (void) newConnectionWithDictionary: (NSDictionary *) d ;
 
 - (NSArray *)sites;
 - (unsigned)countOfSites;

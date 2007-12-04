@@ -10,7 +10,6 @@
 #import "YLTelnet.h"
 #import "YLTerminal.h"
 #import "YLLGlobalConfig.h"
-#import "DBPrefsWindowController.h"
 
 @implementation YLController
 
@@ -46,20 +45,9 @@
         [s setAddress: [d objectForKey: @"address"]];
         [self insertObject: s inSitesAtIndex: [self countOfSites]];
     }
-    [self updateSitesMenu];
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"RestoreConnection"]) {
-        NSArray *a = [[NSUserDefaults standardUserDefaults] arrayForKey: @"LastConnection"];
-        CGFloat opened = 0;
-        for (NSDictionary *d in a) {
-//            [self performSelector: @selector(newConnectionWithDictionary:) withObject: d afterDelay: 0.1 + opened];
-//            opened += 1;
-            [self newConnectionWithDictionary: d];
-        }
-    }
-    [NSTimer scheduledTimerWithTimeInterval: 120 target: self selector: @selector(antiIdle:) userInfo: nil repeats: YES];
+    [NSTimer scheduledTimerWithTimeInterval: 180 target: self selector: @selector(antiIdle:) userInfo: nil repeats: YES];
     [NSTimer scheduledTimerWithTimeInterval: 1 target: self selector: @selector(updateBlinkTicker:) userInfo: nil repeats: YES];
-            
+    [self updateSitesMenu];
 }
 
 - (void) updateBlinkTicker: (NSTimer *) t {
@@ -73,9 +61,8 @@
     NSArray *a = [_telnetView tabViewItems];
     for (NSTabViewItem *item in a) {
         id telnet = [item identifier];
-        if ([telnet connected] && [telnet lastTouchDate] && [[NSDate date] timeIntervalSinceDate: [telnet lastTouchDate]] >= 119) {
-//            unsigned char msg[] = {0x1B, 'O', 'A', 0x1B, 'O', 'B'};
-            unsigned char msg[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        if ([telnet connected] && [telnet lastTouchDate] && [[NSDate date] timeIntervalSinceDate: [telnet lastTouchDate]] >= 179) {
+            unsigned char msg[] = {0x1B, 'O', 'A', 0x1B, 'O', 'B'};
             [telnet sendBytes:msg length:6];
         }
     }
@@ -88,12 +75,6 @@
     [[NSUserDefaults standardUserDefaults] setObject: a forKey: @"Sites"];
     [self updateSitesMenu];
 }
-
-- (void) newConnectionWithDictionary: (NSDictionary *) d {
-    [self newConnectionToAddress: [d valueForKey: @"address"] 
-                            name: [d valueForKey: @"name"]];
-}
-                                    
 
 - (void) newConnectionToAddress: (NSString *) addr name: (NSString *) name {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -263,10 +244,6 @@
     [_telnetView setNeedsDisplay: YES];
 }
 
-- (IBAction) openPreferencesWindow: (id) sender {
-    [[DBPrefsWindowController sharedPrefsWindowController] showWindow:nil];
-}
-
 #pragma mark -
 #pragma mark Accessor
 
@@ -336,52 +313,6 @@
     [_mainWindow makeKeyAndOrderFront: self];
     return NO;
 } 
-
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    int tabNumber = [_telnetView numberOfTabViewItems];
-    int i;
-
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"RestoreConnection"]) {
-        NSMutableArray *a = [NSMutableArray array];
-        for (i = 0; i < tabNumber; i++) {
-            id connection = [[_telnetView tabViewItemAtIndex: i] identifier];
-            if ([connection terminal])
-                [a addObject: [NSDictionary dictionaryWithObjectsAndKeys: [connection connectionName], @"name", [connection connectionAddress], @"address", nil]];
-        }
-        [[NSUserDefaults standardUserDefaults] setObject: a forKey: @"LastConnection"];
-    }
-    
-    if (![[NSUserDefaults standardUserDefaults] boolForKey: @"ConfirmOnQuit"]) 
-        return YES;
-    
-    BOOL hasConnectedConnetion = NO;
-    for (i = 0; i < tabNumber; i++) {
-        id connection = [[_telnetView tabViewItemAtIndex: i] identifier];
-        if ([connection connected]) 
-            hasConnectedConnetion = YES;
-    }
-    if (!hasConnectedConnetion) return YES;
-    NSBeginAlertSheet(NSLocalizedString(@"Are you sure you want to quit Nally?", @"Sheet Title"), 
-                      NSLocalizedString(@"Quit", @"Default Button"), 
-                      NSLocalizedString(@"Cancel", @"Cancel Button"), 
-                      nil, 
-                      _mainWindow, self, 
-                      @selector(confirmSheetDidEnd:returnCode:contextInfo:), 
-                      @selector(confirmSheetDidDismiss:returnCode:contextInfo:), nil, 
-                      [NSString stringWithFormat: NSLocalizedString(@"There are %d tabs open in Nally. Do you want to quit anyway?", @"Sheet Message"),
-                                tabNumber]);
-    return NSTerminateLater;
-}
-
-- (void) confirmSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
-    [NSApp replyToApplicationShouldTerminate: (returnCode == NSAlertDefaultReturn)];
-}
-
-- (void) confirmSheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
-    [NSApp replyToApplicationShouldTerminate: (returnCode == NSAlertDefaultReturn)];
-}
-
 #pragma mark -
 #pragma mark Window Delegation
 
