@@ -123,7 +123,9 @@ void dump_packet(unsigned char *s, int length) {
 }
 
 - (BOOL) connectToAddress: (NSString *) addr {
-    NSArray *a = [addr componentsSeparatedByCharactersInSet: [NSCharacterSet characterSetWithCharactersInString: @": "]];
+    addr = [[addr componentsSeparatedByString: @" "] componentsJoinedByString: @":"];
+    NSArray *a = [addr componentsSeparatedByString: @":"];
+    
     if ([a count] == 2) {
         int p = [[a objectAtIndex: 1] intValue];
         if (p > 0) {
@@ -146,7 +148,7 @@ void dump_packet(unsigned char *s, int length) {
         [self setConnectionAddress: [NSString stringWithFormat: @"%@:%d", addr, port]];
     _port = port;
     NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: addr, @"addr", [NSNumber numberWithInt: port], @"port", nil];
-    [self performSelectorInBackground: @selector(lookUpDomainName:) withObject: dict];
+    [NSThread detachNewThreadSelector:@selector(lookUpDomainName:) toTarget: self withObject: dict];
 
     return YES;
 }
@@ -162,7 +164,7 @@ void dump_packet(unsigned char *s, int length) {
         case NSStreamEventHasBytesAvailable: {
             uint8_t buf[4096];
             while ([(NSInputStream *)stream hasBytesAvailable]) {
-                NSInteger len = [(NSInputStream *)stream read: buf maxLength: 4096];
+                long int len = [(NSInputStream *)stream read: buf maxLength: 4096];
                 if (len > 0) {
                     [self receiveBytes: buf length: len];
                 }
@@ -202,7 +204,7 @@ void dump_packet(unsigned char *s, int length) {
     [self performSelector: @selector(sendMessage:) withObject: d afterDelay: 0.001];
 }
 
-- (void) receiveBytes: (unsigned char *) bytes length: (NSUInteger) length {
+- (void) receiveBytes: (unsigned char *) bytes length: (unsigned long int) length {
 
 	unsigned char *stream = (unsigned char *) bytes;
 	std::deque<unsigned char> terminalBuf;
@@ -336,7 +338,7 @@ void dump_packet(unsigned char *s, int length) {
 	}
 }
 
-- (void) sendBytes: (unsigned char *) msg length: (NSInteger) length {
+- (void) sendBytes: (unsigned char *) msg length: (long int) length {
     if (length <= 0) return;
     if (!_outputStream) return;
     

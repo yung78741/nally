@@ -18,25 +18,26 @@
 	int _cellWidth;
 	int _cellHeight;
     
+    BOOL _antiIdle;
     BOOL _showHiddenText;
-	BOOL _blinkTicker;
-    BOOL _shouldSmoothFonts;
     BOOL _detectDoubleByte;
+	BOOL _blinkTicker;
     
 	NSFont *_eFont;
 	NSFont *_cFont;
-	CTFontRef _cCTFont;
-	CTFontRef _eCTFont;
 	CGFontRef _cCGFont;
 	CGFontRef _eCGFont;
+    
+    float _eDecent;
+    float _cDecent;
 	
 	unsigned int _bitmapColorTable[2][NUM_COLOR];
 	NSColor *_colorTable[2][NUM_COLOR];
 	NSDictionary *_cDictTable[2][NUM_COLOR];
 	NSDictionary *_eDictTable[2][NUM_COLOR];
 
-	CFDictionaryRef _cCTAttribute[2][NUM_COLOR];
-	CFDictionaryRef _eCTAttribute[2][NUM_COLOR];
+//	CFDictionaryRef _cCTAttribute[2][NUM_COLOR];
+//	CFDictionaryRef _eCTAttribute[2][NUM_COLOR];
 	
 	ATSUStyle _cATSUStyle[2][NUM_COLOR];
 	ATSUStyle _eATSUStyle[2][NUM_COLOR];
@@ -56,11 +57,11 @@
 - (BOOL)showHiddenText;
 - (void)setShowHiddenText:(BOOL)value;
 
-- (BOOL)shouldSmoothFonts;
-- (void)setShouldSmoothFonts:(BOOL)value;
-
 - (BOOL)detectDoubleByte;
 - (void)setDetectDoubleByte:(BOOL)value;
+
+- (BOOL)antiIdle;
+- (void)setAntiIdle:(BOOL)value;
 
 - (int)cellWidth;
 - (void)setCellWidth:(int)value;

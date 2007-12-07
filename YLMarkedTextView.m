@@ -15,39 +15,50 @@
     self = [super initWithFrame:frame];
     if (self) {
 		[self setDefaultFont: [NSFont fontWithName: @"Lucida Grande" size: 20]];
+        _layoutManager = [[NSLayoutManager alloc] init];
+        _textContainer = [[NSTextContainer alloc] initWithContainerSize: NSMakeSize(999999, 999999)];
+        [_layoutManager addTextContainer: _textContainer];
     }
     return self;
+}
+
+- (void) dealloc {
+    [_layoutManager release];
+    [_textContainer release];
+    [_string release];
+    [_defaultFont release];
+    [super dealloc];
 }
 
 - (void)drawRect:(NSRect)rect {
 	CGContextRef context = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
 	CGContextSaveGState(context);
 	
-	CGFloat half = ([self frame].size.height / 2.0);
+	float half = ([self frame].size.height / 2.0);
 	BOOL fromTop = _destination.y > half;
 	
 	CGContextTranslateCTM(context, 1.0,  1.0);
 	if (!fromTop) 
 		CGContextTranslateCTM(context, 0.0,  5.0);
 
-	CGPoint dest = NSPointToCGPoint(_destination);
+	CGPoint dest = (*(CGPoint *)&(_destination));
 	dest.x -= 1.0;
 	dest.y -= 1.0;
 	if (!fromTop)
 		dest.y -= 5.0;
 	
 	CGContextSaveGState(context);
-	CGFloat ovalSize = 6.0;
+	float ovalSize = 6.0;
 	CGContextTranslateCTM(context, 1.0,  1.0);
 
-    CGFloat fw = ([self bounds].size.width - 3);
-    CGFloat fh = ([self bounds].size.height - 3 - 5);
+    float fw = ([self bounds].size.width - 3);
+    float fh = ([self bounds].size.height - 3 - 5);
 
 	CGContextBeginPath(context);
     CGContextMoveToPoint(context, 0, fh - ovalSize); 
     CGContextAddArcToPoint(context, 0, fh, ovalSize, fh, ovalSize);
 	if (fromTop) {
-		CGFloat left, right;
+		float left, right;
 		left = dest.x - 2.5;
 		right = left + 5.0;
 		if (left < ovalSize) {
@@ -67,7 +78,7 @@
 //	CGContextMoveToPoint(context, fw, ovalSize); 
 	CGContextAddArcToPoint(context, fw, 0, fw - ovalSize, 0, ovalSize);
 	if (!fromTop) {
-		CGFloat left, right;
+		float left, right;
 		left = dest.x - 2.5;
 		right = left + 5.0;
 		if (left < ovalSize) {
@@ -94,15 +105,29 @@
 	CGContextRestoreGState(context);
 
 	CGContextTranslateCTM(context, 4.0,  3.0);
+    
+    
 	[_string drawAtPoint: NSZeroPoint];
 	
-	CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef) _string);
-	CGFloat offset = CTLineGetOffsetForStringIndex(line, _selectedRange.location, NULL);
+
+    float offset;
+    
+    if (_selectedRange.location == 0) {
+        offset = 0;
+    } else {
+        NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithString: [_string string]] autorelease];
+        
+        [textStorage addLayoutManager: _layoutManager];
+        [textStorage addAttributes:[_string attributesAtIndex: 0 effectiveRange: NULL] range: NSMakeRange(0, [_string length])];
+        [_layoutManager glyphRangeForTextContainer: _textContainer];
+        
+        NSRect r = [_layoutManager boundingRectForGlyphRange: NSMakeRange(0, _selectedRange.location) inTextContainer: _textContainer];
+        offset = r.size.width;
+    }
+
 	[[NSColor whiteColor] set];
 	[NSBezierPath strokeLineFromPoint: NSMakePoint(offset, 0) toPoint: NSMakePoint(offset, _lineHeight)];
 	CGContextRestoreGState(context);
-	
-	CFRelease(line);
 }
 
 
@@ -123,13 +148,19 @@
 	_string = as;
 	[self setNeedsDisplay: YES];
 
-	CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef) _string);
-	double w = CTLineGetTypographicBounds(line, NULL, NULL, NULL) ;
+    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithString: [_string string]] autorelease];    
+    [textStorage addLayoutManager: _layoutManager];
+    [textStorage addAttributes:[_string attributesAtIndex: 0 effectiveRange: NULL] range: NSMakeRange(0, [_string length])];
+    [_layoutManager glyphRangeForTextContainer: _textContainer];
+    
+    NSRect r = [_layoutManager boundingRectForGlyphRange: NSMakeRange(0, [_string length]) inTextContainer: _textContainer];
+    
+    double w = r.size.width;
 	NSSize size = [self frame].size;
 	size.width = w + 12;
 	size.height = _lineHeight + 8 + 5;
 	[self setFrameSize: size];
-	CFRelease(line);
+//	CFRelease(line);
 }
 
 - (NSRange)markedRange {

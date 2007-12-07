@@ -25,26 +25,26 @@ static NSArray *gEncodingArray = nil;
 	if(sSharedInstance) {
 		[self release];
 	} else if(self = sSharedInstance = [[super init] retain]) {
-        [self setShowHiddenText: [[NSUserDefaults standardUserDefaults] boolForKey: @"ShowHiddenText"]];
-        [self setShouldSmoothFonts: [[NSUserDefaults standardUserDefaults] boolForKey: @"ShouldSmoothFonts"]];
-        [self setDetectDoubleByte: [[NSUserDefaults standardUserDefaults] boolForKey: @"DetectDoubleByte"]];
-
 		/* init code */
 		_row = 24;
 		_column = 80;
 		_cellWidth = 12;
 		_cellHeight = 24;
-//		[self setEFont: [NSFont fontWithName: @"Monaco" size: 18]];
-//        NSFontDescriptor *descriptor = [NSFontDescriptor fontDescriptorWithName: @"Hiragino Kaku Gothic Pro" size: 22];
-//		[self setCFont: [NSFont fontWithDescriptor: [descriptor fontDescriptorWithFace: @"W3"] size: 22]];
 
+        [self setAntiIdle: [[NSUserDefaults standardUserDefaults] boolForKey: @"AntiIdle"]];
+        [self setShowHiddenText: [[NSUserDefaults standardUserDefaults] boolForKey: @"ShowHiddenText"]];
+        [self setDetectDoubleByte: [[NSUserDefaults standardUserDefaults] boolForKey: @"DetectDoubleByte"]];
+        
+        _eDecent = 3;
+        _cDecent = 3;
+        
 		_colorTable[0][0] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][0] = [[NSColor colorWithDeviceRed: 0.25 green: 0.25 blue: 0.25 alpha: 1.0] retain];
 		_colorTable[0][1] = [[NSColor colorWithDeviceRed: 0.50 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][1] = [[NSColor colorWithDeviceRed: 1.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[0][2] = [[NSColor colorWithDeviceRed: 0.00 green: 0.50 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][2] = [[NSColor colorWithDeviceRed: 0.00 green: 1.00 blue: 0.00 alpha: 1.0] retain];
-		_colorTable[0][3] = [[NSColor colorWithDeviceRed: 0.50 green: 0.50 blue: 0.00 alpha: 1.0] retain];
+		_colorTable[0][3] = [[NSColor colorWithDeviceRed: 0.55 green: 0.32 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][3] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[0][4] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.50 alpha: 1.0] retain];
 		_colorTable[1][4] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 1.00 alpha: 1.0] retain];
@@ -52,9 +52,9 @@ static NSArray *gEncodingArray = nil;
 		_colorTable[1][5] = [[NSColor colorWithDeviceRed: 1.00 green: 0.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[0][6] = [[NSColor colorWithDeviceRed: 0.00 green: 0.50 blue: 0.50 alpha: 1.0] retain];
 		_colorTable[1][6] = [[NSColor colorWithDeviceRed: 0.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
-		_colorTable[0][7] = [[NSColor colorWithDeviceRed: 0.50 green: 0.50 blue: 0.50 alpha: 1.0] retain];
+		_colorTable[0][7] = [[NSColor colorWithDeviceRed: 0.70 green: 0.70 blue: 0.70 alpha: 1.0] retain];
 		_colorTable[1][7] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
-		_colorTable[0][8] = [[NSColor colorWithDeviceRed: 0.75 green: 0.75 blue: 0.75 alpha: 1.0] retain];
+		_colorTable[0][8] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[1][8] = [[NSColor colorWithDeviceRed: 1.00 green: 1.00 blue: 1.00 alpha: 1.0] retain];
 		_colorTable[0][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];
 		_colorTable[1][9] = [[NSColor colorWithDeviceRed: 0.00 green: 0.00 blue: 0.00 alpha: 1.0] retain];  // Background-Color
@@ -81,27 +81,10 @@ static NSArray *gEncodingArray = nil;
 		_bitmapColorTable[1][8] = 0xFFFFFF00;
 		_bitmapColorTable[0][9] = 0x00000000;
 		_bitmapColorTable[1][9] = 0x00000000;
-
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-
-        NSString *eFontName = [defaults stringForKey: @"EnglishFontName"];
-        NSString *cFontName = [defaults stringForKey: @"ChineseFontName"];
-
-        if (! eFontName)
-            eFontName = @"Monaco";
-
-        if (! cFontName)
-            cFontName = @"STHeiti";
-
-        [defaults setObject: eFontName forKey: @"EnglishFontName"];
-        [defaults setObject: cFontName forKey: @"ChineseFontName"];
-
-        [defaults synchronize];
-
+		
 		int i, j;
 		ATSUFontID cATSUFontID, eATSUFontID;
-		char *cATSUFontName = (char *)[cFontName UTF8String];
-        char *eATSUFontName = (char *)[eFontName UTF8String];
+		char *cATSUFontName = "STHeiti", *eATSUFontName = "Monaco";
 //        char *cATSUFontName = "Hiragino Kaku Gothic Pro", *eATSUFontName = "Monaco";
 		ATSUAttributeTag		tags[2];
 		ByteCount				sizes[2];
@@ -110,34 +93,34 @@ static NSArray *gEncodingArray = nil;
 		ATSUFindFontFromName(cATSUFontName, strlen(cATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &cATSUFontID);
 		ATSUFindFontFromName(eATSUFontName, strlen(eATSUFontName), kFontFullName, kFontNoPlatform, kFontNoScript, kFontNoLanguage, &eATSUFontID);
 
-		_cCTFont = CTFontCreateWithPlatformFont(cATSUFontID, 22.0, NULL, NULL);
-		_eCTFont = CTFontCreateWithPlatformFont(eATSUFontID, 18.0, NULL, NULL);
-		_cCGFont = CTFontCopyGraphicsFont(_cCTFont, NULL);
-		_eCGFont = CTFontCopyGraphicsFont(_eCTFont, NULL);
+//		_cCTFont = CTFontCreateWithPlatformFont(cATSUFontID, 22.0, NULL, NULL);
+//		_eCTFont = CTFontCreateWithPlatformFont(eATSUFontID, 18.0, NULL, NULL);
+//		_cCGFont = CTFontCopyGraphicsFont(_cCTFont, NULL);
+//		_eCGFont = CTFontCopyGraphicsFont(_eCTFont, NULL);
 		
 		for (i = 0; i < NUM_COLOR; i++) 
 			for (j = 0; j < 2; j++) {
-				_cDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
-									  _cFont, NSFontAttributeName, nil] retain];
-				_eDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
-									  _eFont, NSFontAttributeName, nil] retain];
-
-				
-				CFStringRef cfKeys[] = {kCTFontAttributeName, kCTForegroundColorAttributeName};
-				CFTypeRef cfValues[] = {_cCTFont, _colorTable[j][i]};
-				_cCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
-														 (const void **) cfKeys, 
-														 (const void **) cfValues, 
-														 2, 
-														 &kCFTypeDictionaryKeyCallBacks, 
-														 &kCFTypeDictionaryValueCallBacks);
-				cfValues[0] = _eCTFont;
-				_eCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
-														 (const void **) cfKeys, 
-														 (const void **) cfValues, 
-														 2, 
-														 &kCFTypeDictionaryKeyCallBacks, 
-														 &kCFTypeDictionaryValueCallBacks);
+//				_cDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
+//									  _cFont, NSFontAttributeName, nil] retain];
+//				_eDictTable[j][i] = [[NSDictionary dictionaryWithObjectsAndKeys: _colorTable[j][i], NSForegroundColorAttributeName,
+//									  _eFont, NSFontAttributeName, nil] retain];
+//
+//				
+//				CFStringRef cfKeys[] = {kCTFontAttributeName, kCTForegroundColorAttributeName};
+//				CFTypeRef cfValues[] = {_cCTFont, _colorTable[j][i]};
+//				_cCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
+//														 (const void **) cfKeys, 
+//														 (const void **) cfValues, 
+//														 2, 
+//														 &kCFTypeDictionaryKeyCallBacks, 
+//														 &kCFTypeDictionaryValueCallBacks);
+//				cfValues[0] = _eCTFont;
+//				_eCTAttribute[j][i] = CFDictionaryCreate(kCFAllocatorDefault, 
+//														 (const void **) cfKeys, 
+//														 (const void **) cfValues, 
+//														 2, 
+//														 &kCFTypeDictionaryKeyCallBacks, 
+//														 &kCFTypeDictionaryValueCallBacks);
 				
 				/* ---------- Chinese Style ---------- */
 				ATSUCreateStyle( &(_cATSUStyle[j][i]));
@@ -166,7 +149,7 @@ static NSArray *gEncodingArray = nil;
 				ATSUSetAttributes(_cATSUStyle[j][i], 1, tags, sizes, values);
 				
 				/* Fixed-Width */
-				ATSUTextMeasurement glyphWidth = Long2Fix(12);
+				ATSUTextMeasurement glyphWidth = Long2Fix(24);
 				tags[0] = kATSUImposeWidthTag;
 				sizes[0] = sizeof(ATSUTextMeasurement);
 				values[0] = &glyphWidth;
@@ -307,13 +290,13 @@ static NSArray *gEncodingArray = nil;
     [[NSUserDefaults standardUserDefaults] setBool: value forKey: @"ShowHiddenText"];
 }
 
-- (BOOL)shouldSmoothFonts {
-    return _shouldSmoothFonts;
+- (BOOL)antiIdle {
+    return _antiIdle;
 }
 
-- (void)setShouldSmoothFonts:(BOOL)value {
-    _shouldSmoothFonts = value;
-    [[NSUserDefaults standardUserDefaults] setBool: value forKey: @"ShouldSmoothFonts"];
+- (void)setAntiIdle:(BOOL)value {
+    _antiIdle = value;
+    [[NSUserDefaults standardUserDefaults] setBool: value forKey: @"AntiIdle"];
 }
 
 - (BOOL)detectDoubleByte {

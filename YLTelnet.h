@@ -232,8 +232,8 @@ enum {
 - (YLTerminal *) terminal ;
 - (void) setTerminal: (YLTerminal *) term;
 
-- (void) receiveBytes: (unsigned char *) bytes length: (NSUInteger) length ;
-- (void) sendBytes: (unsigned char *) msg length: (NSInteger) length ;
+- (void) receiveBytes: (unsigned char *) bytes length: (unsigned long int) length ;
+- (void) sendBytes: (unsigned char *) msg length: (long int) length ;
 - (void) sendMessage: (NSData *) msg;
 
 - (NSHost *)host;

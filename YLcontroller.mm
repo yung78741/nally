@@ -13,6 +13,16 @@
 #import "DBPrefsWindowController.h"
 #import "YLEmoticon.h"
 
+static NSString *gMyToolbarIdentifier = @"YLLAN TOOLBAR IDENTIFIER";
+static NSString *gSitesToolbarItemIdentifier = @"SITES TOOLBARITEM IDENTIFIER";
+static NSString *gReconnectToolbarItemIdentifier = @"RECONNECT TOOLBARITEM IDENTIFIER";
+static NSString *gAddToolbarItemIdentifier = @"ADD TOOLBARITEM IDENTIFIER";
+static NSString *gAddressToolbarItemIdentifier = @"ADDRESS TOOLBARITEM IDENTIFIER";
+static NSString *gEmoticonsToolbarItemIdentifier = @"EMOTICONS TOOLBARITEM IDENTIFIER";
+static NSString *gAntiIdleToolbarItemIdentifier = @"ANTIIDLE TOOLBARITEM IDENTIFIER";
+static NSString *gShowHiddenTextToolbarItemIdentifier = @"SHOWHIDDENTEXT TOOLBARITEM IDENTIFIER";
+static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOOLBARITEM IDENTIFIER";
+
 @implementation YLController
 
 - (void) awakeFromNib {
@@ -20,8 +30,23 @@
                                        forKeyPath: @"showHiddenText"
                                           options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) 
                                           context: NULL];
-    [_tab setStyleNamed: @"Metal"];
+    
+    [[YLLGlobalConfig sharedInstance] addObserver: self
+                                       forKeyPath: @"antiIdle"
+                                          options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) 
+                                          context: NULL];
+    [[YLLGlobalConfig sharedInstance] addObserver: self
+                                       forKeyPath: @"detectDoubleByte"
+                                          options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) 
+                                          context: NULL];
+    
+    [[YLLGlobalConfig sharedInstance] setAntiIdle: [[NSUserDefaults standardUserDefaults] boolForKey: @"AntiIdle"]];
+    [[YLLGlobalConfig sharedInstance] setShowHiddenText: [[NSUserDefaults standardUserDefaults] boolForKey: @"ShowHiddenText"]];
+    [[YLLGlobalConfig sharedInstance] setDetectDoubleByte: [[NSUserDefaults standardUserDefaults] boolForKey: @"DetectDoubleByte"]];
+    
+//    [_tab setStyleNamed: @"Adium"];
     [_tab setCanCloseOnlyTab: YES];
+//	[_tab setNeedsDisplay: YES];
         
     [self loadSites];
     [self updateSitesMenu];
@@ -29,6 +54,15 @@
     
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"RestoreConnection"]) 
         [self loadLastConnections];
+    
+    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier: gMyToolbarIdentifier] autorelease];
+    
+    [toolbar setAllowsUserCustomization: YES];
+    [toolbar setAutosavesConfiguration: YES];
+    [toolbar setDisplayMode: NSToolbarDisplayModeIconOnly];
+    [toolbar setShowsBaselineSeparator: NO];
+    [toolbar setDelegate: self];
+    [_mainWindow setToolbar: toolbar];
     
     [NSTimer scheduledTimerWithTimeInterval: 120 target: self selector: @selector(antiIdle:) userInfo: nil repeats: YES];
     [NSTimer scheduledTimerWithTimeInterval: 1 target: self selector: @selector(updateBlinkTicker:) userInfo: nil repeats: YES];
@@ -42,7 +76,8 @@
         [[_sitesMenu submenu] removeItemAtIndex: 3];
     }
     
-    for (YLSite *s in _sites) {
+    for (i = 0; i < [_sites count]; i++) {
+        YLSite *s = [_sites objectAtIndex: i];
         NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle: [s name] action: @selector(openSiteMenu:) keyEquivalent: @""];
         [menuItem setRepresentedObject: s];
         [[_sitesMenu submenu] addItem: menuItem];
@@ -72,7 +107,9 @@
 - (void) antiIdle: (NSTimer *) t {
     if (![[NSUserDefaults standardUserDefaults] boolForKey: @"AntiIdle"]) return;
     NSArray *a = [_telnetView tabViewItems];
-    for (NSTabViewItem *item in a) {
+    int i;
+    for (i = 0; i < [a count]; i++) {
+        NSTabViewItem *item = [a objectAtIndex: i];
         id telnet = [item identifier];
         if ([telnet connected] && [telnet lastTouchDate] && [[NSDate date] timeIntervalSinceDate: [telnet lastTouchDate]] >= 119) {
 //            unsigned char msg[] = {0x1B, 'O', 'A', 0x1B, 'O', 'B'};
@@ -130,6 +167,140 @@
 }
 
 #pragma mark -
+#pragma mark Toolbar
+
+- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar itemForItemIdentifier: (NSString *) itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted {
+    // Required delegate method:  Given an item identifier, this method returns an item 
+    // The toolbar will use this method to obtain toolbar items that can be displayed in the customization sheet, or in the toolbar itself 
+    NSToolbarItem *toolbarItem = nil;
+    
+    if ([itemIdent isEqual: gSitesToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Sites", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Sites", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Sites", @"")];
+        [toolbarItem setView: _sitesButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        
+        [toolbarItem setTarget: self];
+        [toolbarItem setAction: @selector(editSites:)];
+    } else if ([itemIdent isEqual: gReconnectToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Reconnect", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Reconnect", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Reconnect", @"")];
+        [toolbarItem setView: _reconnectButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        
+        [toolbarItem setTarget: self];
+        [toolbarItem setAction: @selector(reconnect:)];
+    } else if ([itemIdent isEqual: gAddToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Add This Site",@"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Add This Site", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Add This Site", @"")];
+        [toolbarItem setView: _addButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        
+        [toolbarItem setTarget: self];
+        [toolbarItem setAction: @selector(addSites:)];
+    } else if ([itemIdent isEqual: gAddressToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Address", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Address", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Address", @"")];
+        [toolbarItem setView: _addressButton];
+		[toolbarItem setMinSize: NSMakeSize(208, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(210, 23)];
+        [toolbarItem setTarget: self];
+        [toolbarItem setAction: @selector(connect:)];
+    } else if ([itemIdent isEqual: gEmoticonsToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Emoticons", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Emoticons", @"")];
+
+        [toolbarItem setToolTip: NSLocalizedString(@"Emoticons", @"")];
+        [toolbarItem setView: _emoticonsButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+
+        [toolbarItem setTarget: self];
+        [toolbarItem setAction: @selector(openEmoticonsWindow:)];
+    } else if ([itemIdent isEqual: gAntiIdleToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Anti-Idle", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Anti-Idle", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Anti-Idle", @"")];
+        [toolbarItem setView: _antiIdleButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+
+    } else if ([itemIdent isEqual: gShowHiddenTextToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Show Hidden Text", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Show Hidden Text", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Show Hidden Text", @"")];
+        [toolbarItem setView: _showHiddenTextButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+
+    } else if ([itemIdent isEqual: gDetectDoubleByteToolbarItemIdentifier]) {
+        toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+        
+        [toolbarItem setLabel: NSLocalizedString(@"Detect Double Bytes", @"")];
+        [toolbarItem setPaletteLabel: NSLocalizedString(@"Detect Double Bytes", @"")];
+        
+        [toolbarItem setToolTip: NSLocalizedString(@"Detect Double Bytes", @"")];
+        [toolbarItem setView: _detectDoubleByteButton];
+		[toolbarItem setMinSize: NSMakeSize(30, 23)];
+		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+
+    }
+    return toolbarItem;
+}
+
+- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
+
+    return [NSArray arrayWithObjects:	gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
+            gAddToolbarItemIdentifier, gAddressToolbarItemIdentifier, NSToolbarFlexibleSpaceItemIdentifier, 
+            gEmoticonsToolbarItemIdentifier, gAntiIdleToolbarItemIdentifier, gShowHiddenTextToolbarItemIdentifier, gDetectDoubleByteToolbarItemIdentifier, nil];
+}
+
+- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
+    return [NSArray arrayWithObjects:	gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
+            gAddToolbarItemIdentifier, gAddressToolbarItemIdentifier, NSToolbarFlexibleSpaceItemIdentifier, 
+            gEmoticonsToolbarItemIdentifier, gAntiIdleToolbarItemIdentifier, gShowHiddenTextToolbarItemIdentifier, gDetectDoubleByteToolbarItemIdentifier, nil];
+}
+
+- (void) toolbarWillAddItem: (NSNotification *) notif {
+
+}  
+
+- (void) toolbarDidRemoveItem: (NSNotification *) notif {
+
+}
+
+- (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
+    return YES;
+}
+
+#pragma mark -
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -140,6 +311,17 @@
         [_showHiddenTextMenuItem setState: NSOnState];
     else
         [_showHiddenTextMenuItem setState: NSOffState];
+
+    if ([[YLLGlobalConfig sharedInstance] antiIdle]) 
+        [_antiIdleMenuItem setState: NSOnState];
+    else
+        [_antiIdleMenuItem setState: NSOffState];
+    
+    if ([[YLLGlobalConfig sharedInstance] detectDoubleByte]) 
+        [_detectDoubleByteMenuItem setState: NSOnState];
+    else
+        [_detectDoubleByteMenuItem setState: NSOffState];
+
 }
 
 #pragma mark -
@@ -147,34 +329,49 @@
 
 - (void) loadSites {
     NSArray *array = [[NSUserDefaults standardUserDefaults] arrayForKey: @"Sites"];
-    for (NSDictionary *d in array) 
-        [self insertObject: [YLSite siteWithDictionary: d] inSitesAtIndex: [self countOfSites]];    
+    int i;
+    for (i = 0; i < [array count]; i++) {
+        NSDictionary *d = [array objectAtIndex: i];
+        [self insertObject: [YLSite siteWithDictionary: d] inSitesAtIndex: [self countOfSites]];
+    }
+        
 }
 
 - (void) saveSites {
     NSMutableArray *a = [NSMutableArray array];
-    for (YLSite *s in _sites) 
+    int i;
+    for (i = 0; i < [_sites count]; i++) {
+        YLSite *s = [_sites objectAtIndex: i];
         [a addObject: [s dictionaryOfSite]];
+    }
     [[NSUserDefaults standardUserDefaults] setObject: a forKey: @"Sites"];
     [self updateSitesMenu];
 }
 
 - (void) loadEmoticons {
     NSArray *a = [[NSUserDefaults standardUserDefaults] arrayForKey: @"Emoticons"];
-    for (NSDictionary *d in a)
+    int i;
+    for (i = 0; i < [a count]; i++) {
+        NSDictionary *d = [a objectAtIndex: i];
         [self insertObject: [YLEmoticon emoticonWithDictionary: d] inEmoticonsAtIndex: [self countOfEmoticons]];
+    }
 }
 
 - (void) saveEmoticons {
     NSMutableArray *a = [NSMutableArray array];
-    for (YLEmoticon *e in _emoticons) 
+    int i;
+    for (i = 0; i < [_emoticons count]; i++) {
+        YLEmoticon *e = [_emoticons objectAtIndex: i];
         [a addObject: [e dictionaryOfEmoticon]];
+    } 
     [[NSUserDefaults standardUserDefaults] setObject: a forKey: @"Emoticons"];    
 }
 
 - (void) loadLastConnections {
     NSArray *a = [[NSUserDefaults standardUserDefaults] arrayForKey: @"LastConnections"];
-    for (NSDictionary *d in a) {
+    int i;
+    for (i = 0; i < [a count]; i++) {
+        NSDictionary *d = [a objectAtIndex: i];
         [self newConnectionWithDictionary: d];
     }    
 }
@@ -300,10 +497,12 @@
 - (IBAction) addSites: (id) sender {
     if ([_telnetView numberOfTabViewItems] == 0) return;
     NSString *address = [[_telnetView telnet] connectionAddress];
-    
-    for (YLSite *s in _sites) 
+    int i;
+    for (i = 0; i < [_sites count]; i++) {
+        YLSite *s = [_sites objectAtIndex: i];
         if ([[s address] isEqualToString: address]) 
-            return;
+            return;        
+    }
     
     YLSite *s = [[YLSite new] autorelease];
     [s setName: address];
@@ -317,7 +516,7 @@
 
 
 
-- (IBAction) showHiddenText: (id) sender {
+- (IBAction) showHiddenTextAction: (id) sender {
     BOOL show = ([sender state] == NSOnState);
     if ([sender isKindOfClass: [NSMenuItem class]]) {
         show = !show;
@@ -329,6 +528,23 @@
     [_telnetView setNeedsDisplay: YES];
 }
 
+- (IBAction) detectDoubleByteAction: (id) sender {
+    BOOL value = ([sender state] == NSOnState);
+    if ([sender isKindOfClass: [NSMenuItem class]]) {
+        value = !value;
+    }
+    
+    [[YLLGlobalConfig sharedInstance] setDetectDoubleByte: value];
+}
+
+- (IBAction) antiIdleAction: (id) sender {
+    BOOL value = ([sender state] == NSOnState);
+    if ([sender isKindOfClass: [NSMenuItem class]]) {
+        value = !value;
+    }
+    
+    [[YLLGlobalConfig sharedInstance] setAntiIdle: value];
+}
 - (IBAction) openPreferencesWindow: (id) sender {
     [[DBPrefsWindowController sharedPrefsWindowController] showWindow:nil];
 }
@@ -488,7 +704,7 @@
         [self saveLastConnections];
     
     if (![[NSUserDefaults standardUserDefaults] boolForKey: @"ConfirmOnQuit"]) 
-        return YES;
+        return NSTerminateNow;
     
     BOOL hasConnectedConnetion = NO;
     for (i = 0; i < tabNumber; i++) {
@@ -496,15 +712,15 @@
         if ([connection connected]) 
             hasConnectedConnetion = YES;
     }
-    if (!hasConnectedConnetion) return YES;
-    NSBeginAlertSheet(NSLocalizedString(@"Are you sure you want to quit Nally?", @"Sheet Title"), 
+    if (!hasConnectedConnetion) return NSTerminateNow;
+    NSBeginAlertSheet(NSLocalizedString(@"Are you sure you want to quit Dort?", @"Sheet Title"), 
                       NSLocalizedString(@"Quit", @"Default Button"), 
                       NSLocalizedString(@"Cancel", @"Cancel Button"), 
                       nil, 
                       _mainWindow, self, 
                       @selector(confirmSheetDidEnd:returnCode:contextInfo:), 
                       @selector(confirmSheetDidDismiss:returnCode:contextInfo:), nil, 
-                      [NSString stringWithFormat: NSLocalizedString(@"There are %d tabs open in Nally. Do you want to quit anyway?", @"Sheet Message"),
+                      [NSString stringWithFormat: NSLocalizedString(@"There are %d tabs open in Dort. Do you want to quit anyway?", @"Sheet Message"),
                                 tabNumber]);
     return NSTerminateLater;
 }

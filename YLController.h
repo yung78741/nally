@@ -29,7 +29,18 @@
     IBOutlet NSMenuItem *_sitesMenu;
     IBOutlet NSTableView *_sitesTableView;
     IBOutlet NSMenuItem *_showHiddenTextMenuItem;
+    IBOutlet NSMenuItem *_antiIdleMenuItem;
+    IBOutlet NSMenuItem *_detectDoubleByteMenuItem;
     IBOutlet NSMenuItem *_encodingMenuItem;
+
+    IBOutlet id _sitesButton;
+    IBOutlet id _reconnectButton;
+    IBOutlet id _addButton;
+    IBOutlet id _addressButton;
+    IBOutlet id _emoticonsButton;
+    IBOutlet id _antiIdleButton;
+    IBOutlet id _showHiddenTextButton;
+    IBOutlet id _detectDoubleByteButton;
 }
 
 - (void) updateSitesMenu ;
@@ -51,11 +62,14 @@
 - (IBAction) editSites: (id) sender;
 - (IBAction) closeSites: (id) sender;
 - (IBAction) addSites: (id) sender;
-- (IBAction) showHiddenText: (id) sender;
 - (IBAction) openPreferencesWindow: (id) sender ;
 - (void) newConnectionToAddress: (NSString *) addr name: (NSString *) name encoding: (YLEncoding) encoding;
 - (void) newConnectionWithDictionary: (NSDictionary *) d ;
 - (void) newConnectionWithSite: (YLSite *) s ;
+
+- (IBAction) showHiddenTextAction: (id) sender;
+- (IBAction) detectDoubleByteAction: (id) sender;
+- (IBAction) antiIdleAction: (id) sender;
 
 - (IBAction) closeEmoticons: (id) sender;
 - (IBAction) inputEmoticons: (id) sender;

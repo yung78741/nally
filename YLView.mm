@@ -668,7 +668,7 @@ BOOL isBlinkCell(cell c) {
         [ds updateDoubleByteStateForRow: [ds cursorRow]];
         if ((c == NSRightArrowFunctionKey && [ds attrAtRow: [ds cursorRow] column: [ds cursorColumn]].f.doubleByte == 1) || 
             (c == NSLeftArrowFunctionKey && [ds cursorColumn] > 0 && [ds attrAtRow: [ds cursorRow] column: [ds cursorColumn] - 1].f.doubleByte == 2))
-            if ([[YLLGlobalConfig sharedInstance] detectDoubleByte]) {
+            if ([gConfig detectDoubleByte]) {
                 [[self telnet] sendBytes: arrow length: 6];
                 return;
             }
@@ -679,7 +679,7 @@ BOOL isBlinkCell(cell c) {
 	
 	if (![self hasMarkedText] && (c == 0x7F || c == NSDeleteFunctionKey)) {
 		buf[0] = buf[1] = 0x08;
-        if ([[YLLGlobalConfig sharedInstance] detectDoubleByte] &&
+        if ([gConfig detectDoubleByte] &&
             [ds cursorColumn] > 0 && [ds attrAtRow: [ds cursorRow] column: [ds cursorColumn] - 1].f.doubleByte == 2)
             [[self telnet] sendBytes: buf length: 2];
         else
@@ -888,8 +888,7 @@ BOOL isBlinkCell(cell c) {
             }
         }
         CGContextSaveGState(myCGContext);
-        CGContextSetShouldSmoothFonts(myCGContext, 
-                                      gConfig->_shouldSmoothFonts == YES ? true : false);
+        CGContextSetShouldSmoothFonts(myCGContext, false);
         
         /* Draw String row by row */
         for (y = 0; y < gRow; y++) {
@@ -922,8 +921,8 @@ BOOL isBlinkCell(cell c) {
 	CGPoint position[gColumn];
 	int bufLength = 0;
     
-    CGFloat ePaddingLeft = 1.0, ePaddingBottom = 2.0;
-    CGFloat cPaddingLeft = 1.0, cPaddingBottom = 1.0;
+    float ePaddingLeft = 1.0, ePaddingBottom = 2.0;
+    float cPaddingLeft = 1.0, cPaddingBottom = 1.0;
     
     YLTerminal *ds = [self dataSource];
     [ds updateDoubleByteStateForRow: r];
@@ -948,7 +947,7 @@ BOOL isBlinkCell(cell c) {
 			isDoubleByte[bufLength] = NO;
 			textBuf[bufLength] = 0x0000 + (currRow + x)->byte;
 			bufIndex[bufLength] = x;
-			position[bufLength] = CGPointMake(x * _fontWidth + ePaddingLeft, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_eCTFont) + ePaddingBottom);
+			position[bufLength] = CGPointMake(x * _fontWidth + ePaddingLeft, (gRow - 1 - r) * _fontHeight + gConfig->_eDecent + ePaddingBottom);
             isDoubleColor[bufLength] = NO;
 			bufLength++;
 		} else if (db == 1) {
@@ -958,12 +957,6 @@ BOOL isBlinkCell(cell c) {
 			unichar ch = [ds encoding] == YLBig5Encoding ? B2U[code] : G2U[code];
 			if (isSpecialSymbol(ch)) {
 				[self drawSpecialSymbol: ch forRow: r column: (x - 1) leftAttribute: (currRow + x - 1)->attr rightAttribute: (currRow + x)->attr];
-				isDoubleByte[bufLength] = isDoubleByte[bufLength + 1] = NO;
-				textBuf[bufLength] = 0x3000; // full-width space
-				position[bufLength] = CGPointMake((x - 1) * _fontWidth + cPaddingLeft, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + cPaddingBottom);
-				bufIndex[bufLength] = x;
-                isDoubleColor[bufLength] = NO;
-				bufLength++;
 			} else {
                 unsigned int fgIndex1, fgIndex2;
                 BOOL bold1, bold2;
@@ -976,7 +969,7 @@ BOOL isBlinkCell(cell c) {
 				isDoubleByte[bufLength] = YES;
 				textBuf[bufLength] = ch;
 				bufIndex[bufLength] = x;
-				position[bufLength] = CGPointMake((x - 1) * _fontWidth + cPaddingLeft, (gRow - 1 - r) * _fontHeight + CTFontGetDescent(gConfig->_cCTFont) + cPaddingBottom);
+				position[bufLength] = CGPointMake((x - 1) * _fontWidth + cPaddingLeft, (gRow - 1 - r) * _fontHeight + gConfig->_cDecent + cPaddingBottom);
 				bufLength++;
 			}
 			if (x == start)
@@ -984,12 +977,14 @@ BOOL isBlinkCell(cell c) {
 		}
 	}
 
-	CFStringRef str = CFStringCreateWithCharacters(kCFAllocatorDefault, textBuf, bufLength);
-	CFAttributedStringRef attributedString = CFAttributedStringCreate(kCFAllocatorDefault, str, NULL);
-	CFMutableAttributedStringRef mutableAttributedString = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, 0, attributedString);
-	CFRelease(str);
-	CFRelease(attributedString);
     
+    ATSUAttributeTag tags[2];
+	ByteCount sizes[2];
+	ATSUAttributeValuePtr values[2];
+    
+    ATSUTextLayout layout;
+	ATSUCreateTextLayout(&layout);
+
 	/* Run-length of the style */
 	c = 0;
 	while (c < bufLength) {
@@ -998,103 +993,48 @@ BOOL isBlinkCell(cell c) {
 		BOOL db = isDoubleByte[c];
 
 		attribute currAttr, lastAttr = (currRow + bufIndex[c])->attr;
+        int lastIndex = bufIndex[c];
 		for (; c < bufLength; c++) {
 			currAttr = (currRow + bufIndex[c])->attr;
 			if (currAttr.v != lastAttr.v || isDoubleByte[c] != db) break;
+            if (c != location && ((db && bufIndex[c] != lastIndex + 2) || (!db && bufIndex[c] != lastIndex + 1))) break;
+            lastIndex = bufIndex[c];
 		}
 		length = c - location;
 		
-		CFDictionaryRef attr;
+        tags[0] = kATSUCGContextTag;
+        sizes[0] = sizeof (CGContextRef);
+        values[0] = &myCGContext;
+        ATSUSetLayoutControls (layout, 1, tags, sizes, values);
+        ATSUSetTextPointerLocation(layout, textBuf, location, length, bufLength);
+        
+		ATSUStyle style;
 		if (db) 
-			attr = gConfig->_cCTAttribute[!lastAttr.f.reverse && lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
+			style = gConfig->_cATSUStyle[!lastAttr.f.reverse && lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
 		else
-			attr = gConfig->_eCTAttribute[!lastAttr.f.reverse && lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
-		CFAttributedStringSetAttributes(mutableAttributedString, CFRangeMake(location, length), attr, YES);
-	}
-    
-	CTLineRef line = CTLineCreateWithAttributedString(mutableAttributedString);
-	CFRelease(mutableAttributedString);
-	
-	CFIndex glyphCount = CTLineGetGlyphCount(line);
-	if (glyphCount == 0) {
-		CFRelease(line);
-		return;
-	}
-	
-	CFArrayRef runArray = CTLineGetGlyphRuns(line);
-	CFIndex runCount = CFArrayGetCount(runArray);
-	CFIndex glyphOffset = 0;
-	
-	CFIndex runIndex = 0;
-        
-	for (; runIndex < runCount; runIndex++) {
-		CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex(runArray,  runIndex);
-		CFIndex runGlyphCount = CTRunGetGlyphCount(run);
-		CFIndex runGlyphIndex = 0;
-
-		CFDictionaryRef attrDict = CTRunGetAttributes(run);
-		CTFontRef runFont = (CTFontRef)CFDictionaryGetValue(attrDict,  kCTFontAttributeName);
-		CGFontRef cgFont = CTFontCopyGraphicsFont(runFont, NULL);
-		NSColor *runColor = (NSColor *) CFDictionaryGetValue(attrDict, kCTForegroundColorAttributeName);
-		        
-		CGContextSetFont(myCGContext, cgFont);
-		CGContextSetFontSize(myCGContext, CTFontGetSize(runFont));
-		CGContextSetRGBFillColor(myCGContext, 
-								 [runColor redComponent], 
-								 [runColor greenComponent], 
-								 [runColor blueComponent], 
-								 1.0);
-        CGContextSetRGBStrokeColor(myCGContext, 1.0, 1.0, 1.0, 1.0);
-        CGContextSetLineWidth(myCGContext, 1.0);
-        
-        int location = runGlyphIndex = 0;
-        int lastIndex = bufIndex[glyphOffset];
-        BOOL hidden = isHiddenAttribute(currRow[lastIndex].attr);
-        
-        for (runGlyphIndex = 0; runGlyphIndex <= runGlyphCount; runGlyphIndex++) {
-            int index = bufIndex[glyphOffset + runGlyphIndex];
-
-            if (runGlyphIndex == runGlyphCount || 
-                (gConfig->_showHiddenText && isHiddenAttribute(currRow[index].attr) != hidden) ||
-                (isDoubleByte[runGlyphIndex] && index != lastIndex + 2) ||
-                (!isDoubleByte[runGlyphIndex] && index != lastIndex + 1)) {
-                int len = runGlyphIndex - location;
+			style = gConfig->_eATSUStyle[!lastAttr.f.reverse && lastAttr.f.bold][lastAttr.f.reverse ? lastAttr.f.bgColor : lastAttr.f.fgColor];
                 
-                if (gConfig->_showHiddenText && hidden) {
-                    CGContextSetTextDrawingMode(myCGContext, kCGTextStroke);
-                } else {
-                    CGContextSetTextDrawingMode(myCGContext, kCGTextFill);                        
-                }
-
-                CGGlyph glyph[gColumn];
-                CFRange glyphRange = CFRangeMake(location, len);
-                CTRunGetGlyphs(run, glyphRange, glyph);
-                
-                CGAffineTransform textMatrix = CTRunGetTextMatrix(run);
-                textMatrix.tx = position[glyphOffset + location].x;
-                textMatrix.ty = position[glyphOffset + location].y;
-                CGContextSetTextMatrix(myCGContext, textMatrix);
-                
-                CGContextShowGlyphsWithAdvances(myCGContext, glyph, isDoubleByte[glyphOffset + location] ? gDoubleAdvance : gSingleAdvance, len);
-                
-                location = runGlyphIndex;
-                if (runGlyphIndex != runGlyphCount)
-                    hidden = isHiddenAttribute(currRow[index].attr);
-            }
-            lastIndex = index;
+        BOOL hidden = isHiddenAttribute(currRow[bufIndex[location]].attr);
+        if (gConfig->_showHiddenText && hidden) {
+            style = gConfig->_eATSUStyle[1][7];
+            if (db) style = gConfig->_cATSUStyle[1][7];
         }
+
+        ATSUSetRunStyle(layout, style, location, length);
         
-		/* Double Color */
-		for (runGlyphIndex = 0; runGlyphIndex < runGlyphCount; runGlyphIndex++) {
-            if (isDoubleColor[glyphOffset + runGlyphIndex]) {
-                CFRange glyphRange = CFRangeMake(runGlyphIndex, 1);
-                CGGlyph glyph;
-                CTRunGetGlyphs(run, glyphRange, &glyph);
-                
-                int index = bufIndex[glyphOffset + runGlyphIndex] - 1;
+        float tx = position[location].x;
+        float ty = position[location].y;
+
+        ATSUDrawText(layout, location, length, FloatToFixed(tx), FloatToFixed(ty));
+
+        /* Double Color */
+        int runGlyphIndex = 0;
+        for (runGlyphIndex = 0; runGlyphIndex < length; runGlyphIndex++) {
+            if (isDoubleColor[location + runGlyphIndex]) {
+                int index = bufIndex[location + runGlyphIndex] - 1;
                 unsigned int bgColor = currRow[index].attr.f.reverse ? currRow[index].attr.f.fgColor : currRow[index].attr.f.bgColor;
                 unsigned int fgColor = currRow[index].attr.f.reverse ? currRow[index].attr.f.bgColor : currRow[index].attr.f.fgColor;
-                
+
                 [gLeftImage lockFocus];
                 [[gConfig colorAtIndex: bgColor hilite: currRow[index].attr.f.reverse && currRow[index].attr.f.bold] set];
                 NSRect rect;
@@ -1102,28 +1042,28 @@ BOOL isBlinkCell(cell c) {
                 rect.origin = NSZeroPoint;
                 [NSBezierPath fillRect: rect];
                 
+                ATSUSetTextPointerLocation(layout, textBuf, location + runGlyphIndex, 1, bufLength);
+                
                 CGContextRef tempContext = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-                NSColor *tempColor = [gConfig colorAtIndex: fgColor hilite: !currRow[index].attr.f.reverse && currRow[index].attr.f.bold];
-                CGContextSetFont(tempContext, cgFont);
-                CGContextSetFontSize(tempContext, CTFontGetSize(runFont));
-                CGContextSetRGBFillColor(tempContext, 
-                                         [tempColor redComponent], 
-                                         [tempColor greenComponent], 
-                                         [tempColor blueComponent], 
-                                         1.0);
-//                CGContextSetAllowsAntialiasing(tempContext, false);
-//                CGContextSetShouldSmoothFonts (tempContext, false);
-//                CGContextSetShouldAntialias(tempContext, false);
-                CGContextShowGlyphsAtPoint(tempContext, cPaddingLeft, CTFontGetDescent(gConfig->_cCTFont) + cPaddingBottom, &glyph, 1);
+                CGContextSetShouldSmoothFonts(tempContext, false);
+                tags[0] = kATSUCGContextTag;
+                sizes[0] = sizeof (CGContextRef);
+                values[0] = &tempContext;
+                ATSUSetLayoutControls (layout, 1, tags, sizes, values);
+                
+                style = gConfig->_cATSUStyle[!currRow[index].attr.f.reverse && currRow[index].attr.f.bold][fgColor];
+                
+                ATSUSetRunStyle(layout, style, location + runGlyphIndex, 1);
+                
+                ATSUDrawText(layout, location + runGlyphIndex, 1, FloatToFixed(cPaddingLeft), FloatToFixed(cPaddingBottom + gConfig->_cDecent));
                 [gLeftImage unlockFocus];
                 [gLeftImage drawAtPoint: NSMakePoint(index * _fontWidth, (gRow - 1 - r) * _fontHeight) fromRect: rect operation: NSCompositeCopy fraction: 1.0];
             }
 		}
-		glyphOffset += runGlyphCount;
-		CFRelease(cgFont);
+        
 	}
-	
-	CFRelease(line);
+            
+        
         
     /* underline */
     for (x = start; x <= end; x++) {
@@ -1143,6 +1083,8 @@ BOOL isBlinkCell(cell c) {
             x--;
         }
     }
+    
+    ATSUDisposeTextLayout(layout);
 }
 
 - (void) updateBackgroundForRow: (int) r from: (int) start to: (int) end {
@@ -1293,7 +1235,9 @@ BOOL isBlinkCell(cell c) {
     
     NSString *s = [self selectedPlainString];
     NSArray *a = [[YLContextualMenuManager sharedInstance] availableMenuItemForSelectionString: s];
-    for(NSMenuItem *item in a) {
+    int i;
+    for(i = 0; i < [a count]; i++) {
+        NSMenuItem *item = [a objectAtIndex: i];
         [menu addItem: item];
     }
     return menu;
@@ -1446,9 +1390,10 @@ BOOL isBlinkCell(cell c) {
 	[_textField setString: aString];
 	[_textField setSelectedRange: selRange];
 	[_textField setMarkedRange: _markedRange];
+	[self setNeedsDisplay: YES];
 
 	NSPoint o = NSMakePoint(ds->_cursorX * _fontWidth, (gRow - 1 - ds->_cursorY) * _fontHeight + 5.0);
-	CGFloat dy;
+	float dy;
 	if (o.x + [_textField frame].size.width > gColumn * _fontWidth) 
 		o.x = gColumn * _fontWidth - [_textField frame].size.width;
 	if (o.y + [_textField frame].size.height > gRow * _fontHeight) {
@@ -1467,14 +1412,15 @@ BOOL isBlinkCell(cell c) {
 	[_markedText release];
 	_markedText = nil;
 	[_textField setHidden: YES];
+	[self setNeedsDisplay: YES];
 }
 
 - (BOOL) hasMarkedText {
 	return (_markedText != nil);
 }
 
-- (NSInteger) conversationIdentifier {
-	return (NSInteger) self;
+- (long int) conversationIdentifier {
+	return (long int) self;
 }
 
 /* Returns attributed string at the range.  This allows input mangers to query any range in backing-store.  May return nil.
@@ -1514,7 +1460,7 @@ BOOL isBlinkCell(cell c) {
 
 /* This method returns the index for character that is nearest to thePoint.  thPoint is in screen coordinate system.
  */
-- (NSUInteger)characterIndexForPoint:(NSPoint)thePoint {
+- (unsigned long int)characterIndexForPoint:(NSPoint)thePoint {
 	return 0;
 }
 
@@ -1531,7 +1477,7 @@ BOOL isBlinkCell(cell c) {
     [_tabItems addObject: tabViewItem];
 }
 
-- (void)insertTabViewItem:(NSTabViewItem *)tabViewItem atIndex:(NSInteger)index {
+- (void)insertTabViewItem:(NSTabViewItem *)tabViewItem atIndex:(long int)index {
     [_tabItems insertObject: tabViewItem atIndex: index];
 }
 
@@ -1539,22 +1485,22 @@ BOOL isBlinkCell(cell c) {
     [_tabItems removeObject: tabViewItem];
 }
 
-- (NSInteger)indexOfTabViewItem:(NSTabViewItem *)tabViewItem {
+- (long int)indexOfTabViewItem:(NSTabViewItem *)tabViewItem {
     return [_tabItems indexOfObject: tabViewItem];
 }
 
-- (NSInteger)indexOfTabViewItemWithIdentifier:(id)identifier {
+- (long int)indexOfTabViewItemWithIdentifier:(id)identifier {
     for (NSTabViewItem *item in _tabItems) {
         if ([item identifier] == identifier) return [_tabItems indexOfObject: item];
     }
     return NSNotFound;
 }
 
-- (NSInteger)numberOfTabViewItems {
+- (long int)numberOfTabViewItems {
     return [_tabItems count];
 }
 
-- (NSTabViewItem *)tabViewItemAtIndex:(NSInteger)index {
+- (NSTabViewItem *)tabViewItemAtIndex:(long int)index {
     return [_tabItems objectAtIndex: index];
 }
 

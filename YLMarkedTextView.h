@@ -14,8 +14,10 @@
 	NSRange _markedRange;
 	NSRange _selectedRange;
 	NSFont *_defaultFont;
-	CGFloat _lineHeight;
+	float _lineHeight;
 	NSPoint _destination;
+    NSLayoutManager *_layoutManager;
+    NSTextContainer *_textContainer;
 }
 
 - (NSAttributedString *)string;
