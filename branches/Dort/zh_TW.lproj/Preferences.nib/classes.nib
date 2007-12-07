@@ -1,0 +1,11 @@
+{
+    IBClasses = (
+        {
+            CLASS = DBPrefsWindowController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {"_fontsPrefView" = NSView; "_generalPrefView" = NSView; }; 
+            SUPERCLASS = NSWindowController; 
+        }
+    ); 
+    IBVersion = 1; 
+}
