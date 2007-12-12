@@ -78,14 +78,12 @@ static unsigned short gEmptyAttr;
 }
 
 - (void) feedBytes: (const unsigned char *) bytes length: (int) len connection: (id) connection {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
 	int i, x;
 	unsigned char c;
 	[_delegate performSelector: @selector(tick:)
 					withObject: nil
 					afterDelay: 0.02];
-//    NSLog(@"length: %d", len);
+
 	for (i = 0; i < len; i++) {
 		c = bytes[i];
 //        if (c == 0x00) continue;
@@ -379,7 +377,6 @@ static unsigned short gEmptyAttr;
 		}
 	}
 //	[_delegate updateBackedImage];
-    [pool release];
 }
 
 # pragma mark -
