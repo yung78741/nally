@@ -20,43 +20,43 @@
             (([event modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask) &&
             [[event charactersIgnoringModifiers] isEqualToString: rightString] ) {
 
-            event = [NSEvent keyEventWithType: [event type] 
-                                     location: [event locationInWindow] 
+            event = [NSEvent keyEventWithType: [event type]
+                                     location: [event locationInWindow]
                                 modifierFlags: [event modifierFlags] ^ NSShiftKeyMask
-                                    timestamp: [event timestamp] 
-                                 windowNumber: [event windowNumber] 
-                                      context: [event context] 
+                                    timestamp: [event timestamp]
+                                 windowNumber: [event windowNumber]
+                                      context: [event context]
                                    characters: rightString
-                  charactersIgnoringModifiers: rightString 
-                                    isARepeat: [event isARepeat] 
-                                      keyCode:[event keyCode]];
-        } else if ((([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask) && 
+                  charactersIgnoringModifiers: rightString
+                                    isARepeat: [event isARepeat]
+                                      keyCode: [event keyCode]];
+        } else if ((([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask) &&
                     (([event modifierFlags] & NSShiftKeyMask) == NSShiftKeyMask) &&
                     [[event charactersIgnoringModifiers] isEqualToString: leftString] ) {
-            
-            event = [NSEvent keyEventWithType: [event type] 
-                                     location: [event locationInWindow] 
+
+            event = [NSEvent keyEventWithType: [event type]
+                                     location: [event locationInWindow]
                                 modifierFlags: [event modifierFlags] ^ NSShiftKeyMask
-                                    timestamp: [event timestamp] 
-                                 windowNumber: [event windowNumber] 
-                                      context: [event context] 
+                                    timestamp: [event timestamp]
+                                 windowNumber: [event windowNumber]
+                                      context: [event context]
                                    characters: leftString
-                  charactersIgnoringModifiers: leftString 
-                                    isARepeat: [event isARepeat] 
-                                      keyCode:[event keyCode]];
-        } else if (([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask && 
-                   ([event modifierFlags] & NSAlternateKeyMask) == 0 && 
-                   ([event modifierFlags] & NSControlKeyMask) == 0 && 
-                   ([event modifierFlags] & NSShiftKeyMask) == 0 && 
-                   [[event characters] intValue] > 0 && 
+                  charactersIgnoringModifiers: leftString
+                                    isARepeat: [event isARepeat]
+                                      keyCode: [event keyCode]];
+        } else if (([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask &&
+                   ([event modifierFlags] & NSAlternateKeyMask) == 0 &&
+                   ([event modifierFlags] & NSControlKeyMask) == 0 &&
+                   ([event modifierFlags] & NSShiftKeyMask) == 0 &&
+                   [[event characters] intValue] > 0 &&
                    [[event characters] intValue] < 10) {
             [_controller selectTabNumber: [[event characters] intValue]];
             return;
         } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"CommandRHotkey"] &&
-                   ([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask && 
-                   ([event modifierFlags] & NSAlternateKeyMask) == 0 && 
-                   ([event modifierFlags] & NSControlKeyMask) == 0 && 
-                   ([event modifierFlags] & NSShiftKeyMask) == 0 && 
+                   ([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask &&
+                   ([event modifierFlags] & NSAlternateKeyMask) == 0 &&
+                   ([event modifierFlags] & NSControlKeyMask) == 0 &&
+                   ([event modifierFlags] & NSShiftKeyMask) == 0 &&
                    [[event characters] isEqualToString: @"r"]) {
             [_controller reconnect: self];
             return;
