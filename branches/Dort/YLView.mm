@@ -1460,7 +1460,7 @@ BOOL isBlinkCell(cell c) {
 
 /* This method returns the index for character that is nearest to thePoint.  thPoint is in screen coordinate system.
  */
-- (unsigned long int)characterIndexForPoint:(NSPoint)thePoint {
+- (unsigned int)characterIndexForPoint:(NSPoint)thePoint {
 	return 0;
 }
 
