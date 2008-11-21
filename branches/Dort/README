@@ -3,8 +3,9 @@ This is an effort to MFC project of Nally to upgrade Dort. I didn't
 wrote most of the code. Beside MFC, future work includes marking
 authorship inside Dort.
 
-				Mengjuei Hsieh from UC Irvine.
+			Mengjuei Hsieh, Univ. of California Irvine.
 Todo:
 
+0. fixing broken characters (big5)
 1. ssh functionality
 2. Sparkle implement
