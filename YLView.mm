@@ -43,7 +43,7 @@ static NSBezierPath *gSymbolTrianglePath1[4];
 static NSBezierPath *gSymbolTrianglePath2[4];
 
 BOOL isEnglishNumberAlphabet(unsigned char c) {
-    return ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
+    return ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || (c == '-') || (c == '_') || (c == '.');
 }
 
 BOOL isSpecialSymbol(unichar ch) {
