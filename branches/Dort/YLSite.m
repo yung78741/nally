@@ -14,7 +14,7 @@
     if ([super init]) {
         [self setName: @"Site Name"];
         [self setAddress: @"(your.site.org)"];
-        [self setEncoding: YLBig5Encoding];
+        [self setEncoding: YLGBKEncoding];
     }
     return self;
 }

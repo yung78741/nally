@@ -11,35 +11,35 @@
 #import "CommonType.h"
 #import "YLView.h"
 
-@interface YLTerminal : NSObject {	
+@interface YLTerminal : NSObject {  
 @public
-	unsigned int _row;
-	unsigned int _column;
-	unsigned int _cursorX;
-	unsigned int _cursorY;
-	unsigned int _offset;
-	
-	int _savedCursorX;
-	int _savedCursorY;
+    unsigned int _row;
+    unsigned int _column;
+    unsigned int _cursorX;
+    unsigned int _cursorY;
+    unsigned int _offset;
+    
+    int _savedCursorX;
+    int _savedCursorY;
 
-	int _fgColor;
-	int _bgColor;
-	BOOL _bold;
-	BOOL _underline;
-	BOOL _blink;
-	BOOL _reverse;
-	
-	cell **_grid;
-	char *_dirty;
-	
-	enum { TP_NORMAL, TP_ESCAPE, TP_CONTROL } _state;
+    int _fgColor;
+    int _bgColor;
+    BOOL _bold;
+    BOOL _underline;
+    BOOL _blink;
+    BOOL _reverse;
+    
+    cell **_grid;
+    char *_dirty;
+    
+    enum { TP_NORMAL, TP_ESCAPE, TP_CONTROL } _state;
     
     YLEncoding _encoding;
 
-	std::deque<unsigned char> *_csBuf;
-	std::deque<int> *_csArg;
-	unsigned int _csTemp;
-	YLView *_delegate;
+    std::deque<unsigned char> *_csBuf;
+    std::deque<int> *_csArg;
+    unsigned int _csTemp;
+    YLView *_delegate;
     
     int _scrollBeginRow;
     int _scrollEndRow;
@@ -52,6 +52,7 @@
 
 - (void) clearRow: (int) r ;
 - (void) clearRow: (int) r fromStart: (int) s toEnd: (int) e ;
+- (void) clearAll ;
 
 - (BOOL) isDirtyAtRow: (int) r column:(int) c;
 - (attribute) attrAtRow: (int) r column: (int) c ;

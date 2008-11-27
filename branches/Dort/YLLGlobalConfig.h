@@ -12,35 +12,35 @@
 
 @interface YLLGlobalConfig : NSObject {
 @public
-	int _row;
-	int _column;
-	
-	int _cellWidth;
-	int _cellHeight;
+    int _row;
+    int _column;
+    
+    int _cellWidth;
+    int _cellHeight;
     
     BOOL _antiIdle;
     BOOL _showHiddenText;
     BOOL _detectDoubleByte;
-	BOOL _blinkTicker;
+    BOOL _blinkTicker;
     
-	NSFont *_eFont;
-	NSFont *_cFont;
-	CGFontRef _cCGFont;
-	CGFontRef _eCGFont;
+    NSFont *_eFont;
+    NSFont *_cFont;
+    CGFontRef _cCGFont;
+    CGFontRef _eCGFont;
     
     float _eDecent;
     float _cDecent;
-	
-	unsigned int _bitmapColorTable[2][NUM_COLOR];
-	NSColor *_colorTable[2][NUM_COLOR];
-	NSDictionary *_cDictTable[2][NUM_COLOR];
-	NSDictionary *_eDictTable[2][NUM_COLOR];
+    
+    unsigned int _bitmapColorTable[2][NUM_COLOR];
+    NSColor *_colorTable[2][NUM_COLOR];
+    NSDictionary *_cDictTable[2][NUM_COLOR];
+    NSDictionary *_eDictTable[2][NUM_COLOR];
 
-//	CFDictionaryRef _cCTAttribute[2][NUM_COLOR];
-//	CFDictionaryRef _eCTAttribute[2][NUM_COLOR];
-	
-	ATSUStyle _cATSUStyle[2][NUM_COLOR];
-	ATSUStyle _eATSUStyle[2][NUM_COLOR];
+//  CFDictionaryRef _cCTAttribute[2][NUM_COLOR];
+//  CFDictionaryRef _eCTAttribute[2][NUM_COLOR];
+    
+    ATSUStyle _cATSUStyle[2][NUM_COLOR];
+    ATSUStyle _eATSUStyle[2][NUM_COLOR];
 }
 
 + (YLLGlobalConfig *) sharedInstance;

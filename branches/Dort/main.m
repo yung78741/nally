@@ -12,6 +12,6 @@
 
 int main(int argc, char *argv[])
 {
-	init_table();
+    init_table();
     return NSApplicationMain(argc,  (const char **) argv);
 }

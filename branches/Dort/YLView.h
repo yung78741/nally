@@ -10,24 +10,24 @@
 #import "CommonType.h"
 
 @class YLTerminal;
-@class YLTelnet;
+@class YLConnection;
 @class YLMarkedTextView;
 
-@interface YLView : NSTabView <NSTextInput> {	
-	int _fontWidth;
-	int _fontHeight;
-	
-	NSImage *_backedImage;
-	
-	NSTimer *_timer;
-	int _x;
-	int _y;
-	
-	id _markedText;
-	NSRange _selectedRange;
-	NSRange _markedRange;
-	
-	IBOutlet YLMarkedTextView *_textField;
+@interface YLView : NSTabView <NSTextInput> {   
+    int _fontWidth;
+    int _fontHeight;
+    
+    NSImage *_backedImage;
+    
+    NSTimer *_timer;
+    int _x;
+    int _y;
+    
+    id _markedText;
+    NSRange _selectedRange;
+    NSRange _markedRange;
+    
+    IBOutlet YLMarkedTextView *_textField;
     
     int _selectionLocation;
     int _selectionLength;
@@ -44,7 +44,7 @@
 - (void) refreshHiddenRegion;
 
 - (YLTerminal *)dataSource;
-- (YLTelnet *)telnet;
+- (YLConnection *)telnet;
 - (BOOL)connected;
 
 - (void) extendBottomFrom: (int) start to: (int) end;

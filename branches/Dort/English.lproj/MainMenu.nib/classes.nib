@@ -1,87 +1,203 @@
-{
-    IBClasses = (
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSMenuItem; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {
-            CLASS = PSMTabBarControl; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {delegate = id; partnerView = id; style = id; tabView = NSTabView; }; 
-            SUPERCLASS = NSControl; 
-        }, 
-        {
-            ACTIONS = {checkForUpdates = id; }; 
-            CLASS = SUUpdater; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {
-            CLASS = YLApplication; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {"_controller" = YLController; }; 
-            SUPERCLASS = NSApplication; 
-        }, 
-        {
-            ACTIONS = {
-                addSites = id; 
-                antiIdleAction = id; 
-                closeEmoticons = id; 
-                closeSites = id; 
-                closeTab = id; 
-                connect = id; 
-                detectDoubleByteAction = id; 
-                editSites = id; 
-                inputEmoticons = id; 
-                newTab = id; 
-                openEmoticonsWindow = id; 
-                openLocation = id; 
-                openPreferencesWindow = id; 
-                openSites = id; 
-                reconnect = id; 
-                selectNextTab = id; 
-                selectPrevTab = id; 
-                setEncoding = id; 
-                showHiddenTextAction = id; 
-            }; 
-            CLASS = YLController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                "_addButton" = id; 
-                "_addressBar" = id; 
-                "_addressButton" = id; 
-                "_antiIdleButton" = id; 
-                "_antiIdleMenuItem" = NSMenuItem; 
-                "_closeTabMenuItem" = NSMenuItem; 
-                "_closeWindowMenuItem" = NSMenuItem; 
-                "_detectDoubleByteButton" = id; 
-                "_detectDoubleByteMenuItem" = NSMenuItem; 
-                "_emoticonsButton" = id; 
-                "_emoticonsController" = NSArrayController; 
-                "_emoticonsWindow" = NSPanel; 
-                "_encodingMenuItem" = NSMenuItem; 
-                "_mainWindow" = NSWindow; 
-                "_reconnectButton" = id; 
-                "_showHiddenTextButton" = id; 
-                "_showHiddenTextMenuItem" = NSMenuItem; 
-                "_sitesButton" = id; 
-                "_sitesController" = NSArrayController; 
-                "_sitesMenu" = NSMenuItem; 
-                "_sitesTableView" = NSTableView; 
-                "_sitesWindow" = NSPanel; 
-                "_tab" = PSMTabBarControl; 
-                "_telnetView" = id; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = YLLGlobalConfig; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = YLMarkedTextView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
-        {
-            ACTIONS = {paste = id; pasteColor = id; pasteWrap = id; }; 
-            CLASS = YLView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {"_textField" = YLMarkedTextView; }; 
-            SUPERCLASS = NSTabView; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>YLMarkedTextView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>PSMTabBarControl</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>delegate</key>
+				<string>id</string>
+				<key>partnerView</key>
+				<string>id</string>
+				<key>style</key>
+				<string>id</string>
+				<key>tabView</key>
+				<string>NSTabView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSControl</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSMenuItem</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>YLApplication</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>_controller</key>
+				<string>YLController</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSApplication</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>YLLGlobalConfig</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>addSites</key>
+				<string>id</string>
+				<key>antiIdleAction</key>
+				<string>id</string>
+				<key>closeEmoticons</key>
+				<string>id</string>
+				<key>closeSites</key>
+				<string>id</string>
+				<key>closeTab</key>
+				<string>id</string>
+				<key>connect</key>
+				<string>id</string>
+				<key>detectDoubleByteAction</key>
+				<string>id</string>
+				<key>editSites</key>
+				<string>id</string>
+				<key>inputEmoticons</key>
+				<string>id</string>
+				<key>newTab</key>
+				<string>id</string>
+				<key>openEmoticonsWindow</key>
+				<string>id</string>
+				<key>openLocation</key>
+				<string>id</string>
+				<key>openPreferencesWindow</key>
+				<string>id</string>
+				<key>openSites</key>
+				<string>id</string>
+				<key>reconnect</key>
+				<string>id</string>
+				<key>selectNextTab</key>
+				<string>id</string>
+				<key>selectPrevTab</key>
+				<string>id</string>
+				<key>setEncoding</key>
+				<string>id</string>
+				<key>showHiddenTextAction</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>YLController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>_addButton</key>
+				<string>id</string>
+				<key>_addressBar</key>
+				<string>id</string>
+				<key>_addressButton</key>
+				<string>id</string>
+				<key>_antiIdleButton</key>
+				<string>id</string>
+				<key>_antiIdleMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_closeTabMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_closeWindowMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_detectDoubleByteButton</key>
+				<string>id</string>
+				<key>_detectDoubleByteMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_emoticonsButton</key>
+				<string>id</string>
+				<key>_emoticonsController</key>
+				<string>NSArrayController</string>
+				<key>_emoticonsWindow</key>
+				<string>NSPanel</string>
+				<key>_encodingMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_mainWindow</key>
+				<string>NSWindow</string>
+				<key>_reconnectButton</key>
+				<string>id</string>
+				<key>_showHiddenTextButton</key>
+				<string>id</string>
+				<key>_showHiddenTextMenuItem</key>
+				<string>NSMenuItem</string>
+				<key>_sitesButton</key>
+				<string>id</string>
+				<key>_sitesController</key>
+				<string>NSArrayController</string>
+				<key>_sitesMenu</key>
+				<string>NSMenuItem</string>
+				<key>_sitesTableView</key>
+				<string>NSTableView</string>
+				<key>_sitesWindow</key>
+				<string>NSPanel</string>
+				<key>_tab</key>
+				<string>PSMTabBarControl</string>
+				<key>_telnetView</key>
+				<string>id</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>paste</key>
+				<string>id</string>
+				<key>pasteColor</key>
+				<string>id</string>
+				<key>pasteWrap</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>YLView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>_textField</key>
+				<string>YLMarkedTextView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSTabView</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

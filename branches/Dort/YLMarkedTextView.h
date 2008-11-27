@@ -10,12 +10,12 @@
 
 
 @interface YLMarkedTextView : NSView {
-	NSAttributedString *_string;
-	NSRange _markedRange;
-	NSRange _selectedRange;
-	NSFont *_defaultFont;
-	float _lineHeight;
-	NSPoint _destination;
+    NSAttributedString *_string;
+    NSRange _markedRange;
+    NSRange _selectedRange;
+    NSFont *_defaultFont;
+    float _lineHeight;
+    NSPoint _destination;
     NSLayoutManager *_layoutManager;
     NSTextContainer *_textContainer;
 }

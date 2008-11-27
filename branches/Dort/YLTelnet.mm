@@ -20,16 +20,16 @@
 char *_commandName[] = { "SE", "NOP", "DM", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA", "SB", "WILL", "WONT", "DO", "DONT", "IAC" };
 
 void dump_packet(unsigned char *s, int length) {
-	int i;
-	char tmp[1024 * 512]; tmp[0] = '\0';
-	for (i = 0; i < length; i++) {
-		if (s[i] >= SE) sprintf(tmp, "%s(%s)", tmp, _commandName[s[i] - SE]);
-		else if (s[i] == 13) sprintf(tmp, "%s(CR)", tmp);
-		else if (s[i] == 10) sprintf(tmp, "%s(LF)", tmp);
-		else if (s[i] >= 127 || s[i] < 32) sprintf(tmp, "%s[%#x]", tmp, s[i]);
-		else sprintf(tmp, "%s%c", tmp, s[i]);
-	}
-	NSLog(@"%s", tmp);
+    int i;
+    char tmp[1024 * 512]; tmp[0] = '\0';
+    for (i = 0; i < length; i++) {
+        if (s[i] >= SE) sprintf(tmp, "%s(%s)", tmp, _commandName[s[i] - SE]);
+        else if (s[i] == 13) sprintf(tmp, "%s(CR)", tmp);
+        else if (s[i] == 10) sprintf(tmp, "%s(LF)", tmp);
+        else if (s[i] >= 127 || s[i] < 32) sprintf(tmp, "%s[%#x]", tmp, s[i]);
+        else sprintf(tmp, "%s%c", tmp, s[i]);
+    }
+    NSLog(@"%s", tmp);
 }
 #endif
 
@@ -196,146 +196,146 @@ void dump_packet(unsigned char *s, int length) {
 
 /* Send telnet command */
 - (void) sendCommand: (unsigned char) _command option: (unsigned char) _opt {
-	unsigned char b[3];
-	b[0] = IAC;
-	b[1] = _command;
-	b[2] = _opt;
+    unsigned char b[3];
+    b[0] = IAC;
+    b[1] = _command;
+    b[2] = _opt;
     NSData *d = [NSData dataWithBytes: b length: 3];
     [self performSelector: @selector(sendMessage:) withObject: d afterDelay: 0.001];
 }
 
 - (void) receiveBytes: (unsigned char *) bytes length: (unsigned long int) length {
 
-	unsigned char *stream = (unsigned char *) bytes;
-	std::deque<unsigned char> terminalBuf;
-	
-	/* parse the telnet command. */
-	int L = length;
+    unsigned char *stream = (unsigned char *) bytes;
+    std::deque<unsigned char> terminalBuf;
+    
+    /* parse the telnet command. */
+    int L = length;
 #ifdef __DUMPPACKET__
-//	dump_packet(stream, L);
+//  dump_packet(stream, L);
 #endif
-	
-	while (L--) {
-		unsigned char c = *stream++;
-		switch (_state) {
-			case TOP_LEVEL:
-			case SEENCR:
-				if (c == NUL && _state == SEENCR)
-					_state = TOP_LEVEL;
-				else if (c == IAC)
-					_state = SEENIAC;
-				else {
-					if (!_synch)
-						terminalBuf.push_back(c);
-					else if (c == DM)
-						_synch = NO;
-					
-					if (c == CR) 
-						_state = SEENCR;
-					else
-						_state = TOP_LEVEL;
-				}
-				break;
-			case SEENIAC:
-				if (c == DO || c == DONT || c == WILL || c == WONT) {
-					_typeOfOperation = c;
-					if (c == DO)
-						_state = SEENDO;
-					else if (c == DONT)
-						_state = SEENDONT;
-					else if (c == WILL)
-						_state = SEENWILL;
-					else if (c == WONT)
-						_state = SEENWONT;
-				} else if (c == SB)
-					_state = SEENSB;
-				else if (c == DM) {
-					_synch = NO;
-					_state = TOP_LEVEL;
-				} else {
-					/* ignore everything else; print it if it's IAC */
-					if (c == IAC) {
-						// TODO: cwrite(c);
-					}
-					_state = TOP_LEVEL;
-				}
-				break;
-			case SEENWILL: 
-			{
-				if (c == TELOPT_ECHO || c == TELOPT_SGA) 
-					[self sendCommand: DO option: c];
-				else
-					[self sendCommand: DONT option: c];
-				
-				_state = TOP_LEVEL;
-				break;
-			}
-			case SEENWONT:
-				[self sendCommand: DONT option: c];
-				_state = TOP_LEVEL;
-				break;
-			case SEENDO: 
-			{
-				if (c == TELOPT_TTYPE) 
-					[self sendCommand: WILL option: TELOPT_TTYPE];
-				else if (c == TELOPT_NAWS) {
-					unsigned char b[] = {IAC, SB, TELOPT_NAWS, 0, 80, 0, 24, IAC, SE};
-					[self sendCommand: WILL option: TELOPT_NAWS];
+    
+    while (L--) {
+        unsigned char c = *stream++;
+        switch (_state) {
+            case TOP_LEVEL:
+            case SEENCR:
+                if (c == NUL && _state == SEENCR)
+                    _state = TOP_LEVEL;
+                else if (c == IAC)
+                    _state = SEENIAC;
+                else {
+                    if (!_synch)
+                        terminalBuf.push_back(c);
+                    else if (c == DM)
+                        _synch = NO;
+                    
+                    if (c == CR) 
+                        _state = SEENCR;
+                    else
+                        _state = TOP_LEVEL;
+                }
+                break;
+            case SEENIAC:
+                if (c == DO || c == DONT || c == WILL || c == WONT) {
+                    _typeOfOperation = c;
+                    if (c == DO)
+                        _state = SEENDO;
+                    else if (c == DONT)
+                        _state = SEENDONT;
+                    else if (c == WILL)
+                        _state = SEENWILL;
+                    else if (c == WONT)
+                        _state = SEENWONT;
+                } else if (c == SB)
+                    _state = SEENSB;
+                else if (c == DM) {
+                    _synch = NO;
+                    _state = TOP_LEVEL;
+                } else {
+                    /* ignore everything else; print it if it's IAC */
+                    if (c == IAC) {
+                        // TODO: cwrite(c);
+                    }
+                    _state = TOP_LEVEL;
+                }
+                break;
+            case SEENWILL: 
+            {
+                if (c == TELOPT_ECHO || c == TELOPT_SGA) 
+                    [self sendCommand: DO option: c];
+                else
+                    [self sendCommand: DONT option: c];
+                
+                _state = TOP_LEVEL;
+                break;
+            }
+            case SEENWONT:
+                [self sendCommand: DONT option: c];
+                _state = TOP_LEVEL;
+                break;
+            case SEENDO: 
+            {
+                if (c == TELOPT_TTYPE) 
+                    [self sendCommand: WILL option: TELOPT_TTYPE];
+                else if (c == TELOPT_NAWS) {
+                    unsigned char b[] = {IAC, SB, TELOPT_NAWS, 0, 80, 0, 24, IAC, SE};
+                    [self sendCommand: WILL option: TELOPT_NAWS];
                     [self performSelector: @selector(sendMessage:) withObject: [NSData dataWithBytes:b length:9] afterDelay: 0.001];
-//					[self sendBytes: b length: 9];
-				} else 
-					[self sendCommand: WONT option: c];
-				_state = TOP_LEVEL;
-				break;
-			}
-			case SEENDONT:
-				[self sendCommand: WONT option: c];
-				_state = TOP_LEVEL;
-				break;
-			case SEENSB:
-				_sbOption = c;
+//                  [self sendBytes: b length: 9];
+                } else 
+                    [self sendCommand: WONT option: c];
+                _state = TOP_LEVEL;
+                break;
+            }
+            case SEENDONT:
+                [self sendCommand: WONT option: c];
+                _state = TOP_LEVEL;
+                break;
+            case SEENSB:
+                _sbOption = c;
                 [_sbBuffer release];
-				_sbBuffer = [[NSMutableData data] retain];
-				_state = SUBNEGOT;
-				break;
-			case SUBNEGOT:
-				if (c == IAC)
-					_state = SUBNEG_IAC;
-				else 
-					[_sbBuffer appendBytes: &c length: 1];
-				break;
-			case SUBNEG_IAC:
-				/*  [IAC,SB,<option code number>,SEND,IAC],SE */
-				if (c != SE) {
-					[_sbBuffer appendBytes: &c length: 1];
-					_state = SUBNEGOT;
-				} else {
-					const unsigned char *buf = (const unsigned char *)[_sbBuffer bytes];
-					if (_sbOption == TELOPT_TTYPE && [_sbBuffer length] == 1 && buf[0] == TELQUAL_SEND) {
-						unsigned char b[] = {IAC, SB, TELOPT_TTYPE, TELQUAL_IS, 'v', 't', '1', '0', '0', IAC, SE};
+                _sbBuffer = [[NSMutableData data] retain];
+                _state = SUBNEGOT;
+                break;
+            case SUBNEGOT:
+                if (c == IAC)
+                    _state = SUBNEG_IAC;
+                else 
+                    [_sbBuffer appendBytes: &c length: 1];
+                break;
+            case SUBNEG_IAC:
+                /*  [IAC,SB,<option code number>,SEND,IAC],SE */
+                if (c != SE) {
+                    [_sbBuffer appendBytes: &c length: 1];
+                    _state = SUBNEGOT;
+                } else {
+                    const unsigned char *buf = (const unsigned char *)[_sbBuffer bytes];
+                    if (_sbOption == TELOPT_TTYPE && [_sbBuffer length] == 1 && buf[0] == TELQUAL_SEND) {
+                        unsigned char b[] = {IAC, SB, TELOPT_TTYPE, TELQUAL_IS, 'v', 't', '1', '0', '0', IAC, SE};
                         [self performSelector:@selector(sendMessage:) withObject: [NSData dataWithBytes: b length: 11] afterDelay: 0.001];
-//						[self sendBytes: b length: 11];
-					}
-					_state = TOP_LEVEL;
+//                      [self sendBytes: b length: 11];
+                    }
+                    _state = TOP_LEVEL;
                     [_sbBuffer release];
                     _sbBuffer = nil;
-				}
-				break;
-		}
-	}
-	
-	unsigned char chunkBuf[1024];
-	while (!terminalBuf.empty()) {
-		int length = 1024;
-		if (terminalBuf.size() < 1024) 
-			length = terminalBuf.size();
-		int i;
-		for (i = 0; i < length; i++) {
-			chunkBuf[i] = terminalBuf.front();
-			terminalBuf.pop_front();
-		}
-		[_terminal feedBytes: chunkBuf length: length connection: self];
-	}
+                }
+                break;
+        }
+    }
+    
+    unsigned char chunkBuf[1024];
+    while (!terminalBuf.empty()) {
+        int length = 1024;
+        if (terminalBuf.size() < 1024) 
+            length = terminalBuf.size();
+        int i;
+        for (i = 0; i < length; i++) {
+            chunkBuf[i] = terminalBuf.front();
+            terminalBuf.pop_front();
+        }
+        [_terminal feedBytes: chunkBuf length: length connection: self];
+    }
 }
 
 - (void) sendBytes: (unsigned char *) msg length: (long int) length {
@@ -363,22 +363,6 @@ void dump_packet(unsigned char *s, int length) {
     [self sendBytes: (unsigned char *)[msg bytes] length: [msg length]];
 }
 
-
-- (NSString *) lastError {
-	return @"I don't know what error.";
-}
-
-- (YLTerminal *) terminal {
-	return _terminal;
-}
-
-- (void) setTerminal: (YLTerminal *) term {
-	if (term != _terminal) {
-		[_terminal release];
-		_terminal = [term retain];
-	}
-}
-
 - (NSHost *)host {
     return _host;
 }
@@ -390,60 +374,4 @@ void dump_packet(unsigned char *s, int length) {
     }
 }
 
-- (BOOL)connected {
-    return _connected;
-}
-
-- (void)setConnected:(BOOL)value {
-    _connected = value;
-    if (_connected) 
-        [self setIcon: [NSImage imageNamed: @"connect.pdf"]];
-    else
-        [self setIcon: [NSImage imageNamed: @"offline.pdf"]];
-}
-
-- (NSString *)connectionName {
-    return _connectionName;
-}
-
-- (void)setConnectionName:(NSString *)value {
-    if (_connectionName != value) {
-        [_connectionName release];
-        _connectionName = [value retain];
-    }
-}
-
-- (NSImage *)icon {
-    return _icon;
-}
-
-- (void)setIcon:(NSImage *)value {
-    if (_icon != value) {
-        [_icon release];
-        _icon = [value retain];
-    }
-}
-
-- (NSString *)connectionAddress {
-    return _connectionAddress;
-}
-
-- (void)setConnectionAddress:(NSString *)value {
-    if (_connectionAddress != value) {
-        [_connectionAddress release];
-        _connectionAddress = [value retain];
-    }
-}
-
-- (BOOL)isProcessing {
-    return _processing;
-}
-
-- (void)setIsProcessing:(BOOL)value {
-    _processing = value;
-}
-
-- (NSDate *) lastTouchDate {
-    return _lastTouchDate;
-}
 @end
