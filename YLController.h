@@ -17,8 +17,8 @@
     IBOutlet NSPanel *_sitesWindow;
     IBOutlet NSPanel *_emoticonsWindow;
     IBOutlet NSWindow *_mainWindow;
-	IBOutlet id _telnetView;
-	IBOutlet id _addressBar;
+    IBOutlet id _telnetView;
+    IBOutlet id _addressBar;
     IBOutlet PSMTabBarControl *_tab;
     IBOutlet NSMenuItem *_closeWindowMenuItem;
     IBOutlet NSMenuItem *_closeTabMenuItem;
