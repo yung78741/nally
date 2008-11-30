@@ -1,10 +1,8 @@
 
-This is an effort to MFC project of Nally to upgrade Dort. I didn't
-wrote most of the code. Beside MFC, future work includes marking
-authorship inside Dort.
+This is an effort to MFC project of Nally to upgrade Dort.
 
 Todo:
 
 0. fixing broken characters (big5)
-1. ssh functionality (done)
-2. Sparkle implement
+1. ssh functionality (done, thanks to)
+2. Sparkle implement (discussion?)
