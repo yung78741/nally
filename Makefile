@@ -6,6 +6,7 @@ all:
 clean:
 	xcodebuild clean; rm -fr build \
 	MacBlueTelnet.xcodeproj/$(USER).mode1 \
+	MacBlueTelnet.xcodeproj/$(USER).mode1v3 \
 	MacBlueTelnet.xcodeproj/$(USER).pbxuser
 
 install: all
