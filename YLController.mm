@@ -7,7 +7,7 @@
 //
 
 #import "YLController.h"
-#import "YLTelnet.h"
+#import "YLConnection.h"
 #import "YLTerminal.h"
 #import "YLLGlobalConfig.h"
 #import "DBPrefsWindowController.h"
@@ -46,7 +46,7 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
     
 //    [_tab setStyleNamed: @"Adium"];
     [_tab setCanCloseOnlyTab: YES];
-//	[_tab setNeedsDisplay: YES];
+//  [_tab setNeedsDisplay: YES];
         
     [self loadSites];
     [self updateSitesMenu];
@@ -131,34 +131,30 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
 
 - (void) newConnectionToAddress: (NSString *) addr name: (NSString *) name encoding: (YLEncoding) encoding {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-	id terminal = [YLTerminal new];
-    id telnet;
-
+    id terminal = [YLTerminal new];
+    YLConnection *connection = [YLConnection connectionWithAddress: addr];
+    
     BOOL emptyTab = [_telnetView telnet] && ([[_telnetView telnet] terminal] == nil);
-
-    if (emptyTab) 
-        telnet = [_telnetView telnet];
-    else 
-        telnet = [[YLTelnet new] autorelease];
-
+    
     [terminal setEncoding: encoding];
-	[telnet setTerminal: terminal];
-    [telnet setConnectionName: name];
-    [telnet setConnectionAddress: addr];
-	[terminal setDelegate: _telnetView];
+    [connection setTerminal: terminal];
+    [connection setConnectionName: name];
+    [connection setConnectionAddress: addr];
+    [terminal setDelegate: _telnetView];
     
     NSTabViewItem *tabItem;
     
     if (emptyTab) {
         tabItem = [_telnetView selectedTabViewItem];
+        [tabItem setIdentifier: connection];
     } else {
-        tabItem = [[[NSTabViewItem alloc] initWithIdentifier: telnet] autorelease];
+        tabItem = [[[NSTabViewItem alloc] initWithIdentifier: connection] autorelease];
         [_telnetView addTabViewItem: tabItem];
     }
     
     [tabItem setLabel: name];
-	
-	[telnet connectToAddress: addr];
+    
+    [connection connectToAddress: addr];
     [_telnetView selectTabViewItem: tabItem];
     [terminal release];
     [self refreshTabLabelNumber: _telnetView];
@@ -182,8 +178,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Sites", @"")];
         [toolbarItem setView: _sitesButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
         
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(editSites:)];
@@ -195,8 +191,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Reconnect", @"")];
         [toolbarItem setView: _reconnectButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
         
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(reconnect:)];
@@ -208,8 +204,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Add This Site", @"")];
         [toolbarItem setView: _addButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
         
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(addSites:)];
@@ -221,8 +217,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Address", @"")];
         [toolbarItem setView: _addressButton];
-		[toolbarItem setMinSize: NSMakeSize(208, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(210, 23)];
+        [toolbarItem setMinSize: NSMakeSize(208, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(210, 23)];
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(connect:)];
     } else if ([itemIdent isEqual: gEmoticonsToolbarItemIdentifier]) {
@@ -233,8 +229,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
 
         [toolbarItem setToolTip: NSLocalizedString(@"Emoticons", @"")];
         [toolbarItem setView: _emoticonsButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
 
         [toolbarItem setTarget: self];
         [toolbarItem setAction: @selector(openEmoticonsWindow:)];
@@ -246,8 +242,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Anti-Idle", @"")];
         [toolbarItem setView: _antiIdleButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
 
     } else if ([itemIdent isEqual: gShowHiddenTextToolbarItemIdentifier]) {
         toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
@@ -257,8 +253,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Show Hidden Text", @"")];
         [toolbarItem setView: _showHiddenTextButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
 
     } else if ([itemIdent isEqual: gDetectDoubleByteToolbarItemIdentifier]) {
         toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
@@ -268,8 +264,8 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
         
         [toolbarItem setToolTip: NSLocalizedString(@"Detect Double Bytes", @"")];
         [toolbarItem setView: _detectDoubleByteButton];
-		[toolbarItem setMinSize: NSMakeSize(30, 23)];
-		[toolbarItem setMaxSize: NSMakeSize(30, 23)];
+        [toolbarItem setMinSize: NSMakeSize(30, 23)];
+        [toolbarItem setMaxSize: NSMakeSize(30, 23)];
 
     }
     return toolbarItem;
@@ -277,13 +273,13 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
 
-    return [NSArray arrayWithObjects:	gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
+    return [NSArray arrayWithObjects:   gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
             gAddToolbarItemIdentifier, gAddressToolbarItemIdentifier, NSToolbarFlexibleSpaceItemIdentifier, 
             gEmoticonsToolbarItemIdentifier, gAntiIdleToolbarItemIdentifier, gShowHiddenTextToolbarItemIdentifier, gDetectDoubleByteToolbarItemIdentifier, nil];
 }
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects:	gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
+    return [NSArray arrayWithObjects:   gSitesToolbarItemIdentifier, gReconnectToolbarItemIdentifier, 
             gAddToolbarItemIdentifier, gAddressToolbarItemIdentifier, NSToolbarFlexibleSpaceItemIdentifier, 
             gEmoticonsToolbarItemIdentifier, gAntiIdleToolbarItemIdentifier, gShowHiddenTextToolbarItemIdentifier, gDetectDoubleByteToolbarItemIdentifier, nil];
 }
@@ -404,7 +400,7 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
 }
 
 - (IBAction) newTab: (id) sender {
-    YLTelnet *telnet = [YLTelnet new];
+    YLConnection *telnet = [YLConnection new];
     [telnet setConnectionAddress: @""];
     [telnet setConnectionName: @""];
     NSTabViewItem *tabItem = [[[NSTabViewItem alloc] initWithIdentifier: telnet] autorelease];
@@ -412,24 +408,24 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
     [_telnetView selectTabViewItem: tabItem];
     
     [_mainWindow makeKeyAndOrderFront: self];
-	[_telnetView resignFirstResponder];
-	[_addressBar becomeFirstResponder];
+    [_telnetView resignFirstResponder];
+    [_addressBar becomeFirstResponder];
     [telnet release];
 }
 
 - (IBAction) connect: (id) sender {
-	[sender abortEditing];
-	[[_telnetView window] makeFirstResponder: _telnetView];
+    [sender abortEditing];
+    [[_telnetView window] makeFirstResponder: _telnetView];
 
-	[self newConnectionToAddress: [sender stringValue] 
+    [self newConnectionToAddress: [sender stringValue] 
                             name: [sender stringValue] 
                         encoding: (YLEncoding) [(NSNumber *)[[NSUserDefaults standardUserDefaults] objectForKey: @"DefaultEncoding"] unsignedShortValue]];
 }
 
 - (IBAction) openLocation: (id) sender {
     [_mainWindow makeKeyAndOrderFront: self];
-	[_telnetView resignFirstResponder];
-	[_addressBar becomeFirstResponder];
+    [_telnetView resignFirstResponder];
+    [_addressBar becomeFirstResponder];
 }
 
 - (IBAction) reconnect: (id) sender {
@@ -794,11 +790,11 @@ static NSString *gDetectDoubleByteToolbarItemIdentifier = @"DETECTDOUBLEBYTE TOO
 }
 
 - (BOOL)tabView:(NSTabView*)aTabView shouldDragTabViewItem:(NSTabViewItem *)tabViewItem fromTabBar:(PSMTabBarControl *)tabBarControl {
-	return NO;
+    return NO;
 }
 
 - (BOOL)tabView:(NSTabView*)aTabView shouldDropTabViewItem:(NSTabViewItem *)tabViewItem inTabBar:(PSMTabBarControl *)tabBarControl {
-	return YES;
+    return YES;
 }
 
 - (void)tabView:(NSTabView*)aTabView didDropTabViewItem:(NSTabViewItem *)tabViewItem inTabBar:(PSMTabBarControl *)tabBarControl {
