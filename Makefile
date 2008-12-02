@@ -10,4 +10,8 @@ clean:
 	MacBlueTelnet.xcodeproj/$(USER).pbxuser
 
 install: all
-	cp -pr build/Release/Dort.app /Applications/
+	rsync -avx build/Release/Dort.app /Applications/
+
+release: all
+	hdiutil create -srcfolder build/Release -volname "Dort 1.1" build/Dort1.1.dmg; \
+	hdiutil internet-enable -yes build/Dort1.1.dmg
