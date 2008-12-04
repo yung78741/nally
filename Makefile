@@ -10,7 +10,7 @@ clean:
 	MacBlueTelnet.xcodeproj/$(USER).pbxuser
 
 install: all
-	rsync -avx build/Release/Dort.app /Applications/
+	rm -r /Applications/Dort.app; mv build/Release/Dort.app /Applications/
 
 release: all
 	hdiutil create -srcfolder build/Release -volname "Dort 1.1" build/Dort1.1.dmg; \
