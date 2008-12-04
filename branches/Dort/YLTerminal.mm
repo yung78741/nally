@@ -177,7 +177,7 @@ static unsigned short gEmptyAttr;
             } else if (c == 0x1B) { // ESC
                 _state = TP_ESCAPE;
 //           } else if (c == 0x9B) { // Control Sequence Introducer
-// (與中國海字集不相容, do not implement)
+// (與中國海字集不相容, do not implement, also not compatible with GBK)
 //              _csBuf->clear();
 //              _csArg->clear();
 //              _csTemp = 0;

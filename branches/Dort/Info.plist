@@ -20,6 +20,10 @@
 	<string>DORT</string>
 	<key>CFBundleVersion</key>
 	<string>1.1</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Dort 1.1, Copyright © 2007-2008 Macblue Telnet Group</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
