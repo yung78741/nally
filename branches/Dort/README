@@ -4,5 +4,5 @@ This is an effort to MFC project of Nally to upgrade Dort.
 Todo:
 
 0. fixing broken characters (big5)
-1. ssh functionality (done, thanks to)
+1. ssh functionality (done, thanks to Wen-Tao Han.)
 2. Sparkle implement (discussion?)
