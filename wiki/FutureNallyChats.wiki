@@ -6,6 +6,7 @@
   * UTF-8 support
   * Fully vt100 support (autowrap, insert mode, blahblahblah)
   * Scrollback
+  * multiple geometry (132x24, perhaps full-screen) support, after vt100 task - mjhsieh
 
 = Plug-Ins =
 == feature ==
@@ -26,3 +27,4 @@
 
 = vt100 =
 要支援 autowrap，必須將現在的資料結構改掉。改成儲存原始資料，以行分隔，等到 view 要存取時再重新 parse control code 對應到格子上？
+(mjhsieh: 倒也不必，當初 dec terminal 的輸出也沒有行的概念, 行是 parse/render 出來的沒錯)
