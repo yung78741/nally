@@ -25,4 +25,4 @@
   * 沿用目前的 storage，只是 U+00FF 以下就只取 low byte 存進 char。U+0100以上就分別儲存在兩個 cell 中。目前的 doubleByte flag 仍可沿用。
 
 = vt100 =
-要支援 autowrap，必須將現在的資料結構改掉。
+要支援 autowrap，必須將現在的資料結構改掉。改成儲存原始資料，以行分隔，等到 view 要存取時再重新 parse control code 對應到格子上？
