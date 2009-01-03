@@ -1,0 +1,17 @@
+#The progress finishing vttest
+
+= Introduction =
+
+VTTEST is a very useful application to demonstrate features of VT100 and related terminals. It can also be used to test the compatibility of terminal emulator.
+
+= Implementations =
+
+ # Implemented response upon terminal type query, however Nally only replies it's a VT102.
+ # Properly ignoring "Selects G0 character" control command: <img src="http://lh3.ggpht.com/_83P-OanxqzA/STbgAI6cVWI/AAAAAAAAARQ/HYs82Rfc_Ak/s640/Picture%201.png">
+ # Implemented ^[[K to ease characters from cursor to the end of line.
+ # Implemented ^[#8 to fill the whole screen with E for alignment test.
+
+= Details =
+
+  * We are not interested in 132 column mode in Nally right now.
+  * Tabulation Stop has not yet been implemented in Nally.
