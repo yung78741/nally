@@ -8,10 +8,10 @@ VTTEST is a very useful application to demonstrate features of VT100 and related
 
  # Implemented response upon terminal type query, however Nally only replies it's a VT102.
  # Properly ignoring "Selects G0 character" control command: http://lh3.ggpht.com/_83P-OanxqzA/STbgAI6cVWI/AAAAAAAAARQ/HYs82Rfc_Ak/s640/Picture%201.png
- # Implemented ^[[K to ease characters from cursor to the end of line.
- # Implemented ^[#8 to fill the whole screen with E for alignment test.
+ # Implemented `^[[K` to ease characters from cursor to the end of line.
+ # Implemented `^[#8` to fill the whole screen with E for alignment test.
  # Cusor Movement Test 1: (backspace behavior) <img src="http://farm4.static.flickr.com/3292/3145320715_b4f1b41319_o.png" width="640" />
- # Properly ignoring 132 column mode: ^[[?3h and ^[[?3l
+ # Properly ignoring 132 column mode: `^[[?3h` and `^[[?3l`
  # Cusor Movement Test 3: (autowrap, scroll within a range of row) <img src="http://farm4.static.flickr.com/3088/3146153232_162a358b25_o.png" width="640" />
 
 = Details =
