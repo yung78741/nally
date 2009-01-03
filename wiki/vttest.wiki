@@ -1,5 +1,5 @@
 #labels Phase-Implementation
-#The progress finishing vttest
+#The progress finishing vttest.
 
 = Introduction =
 
