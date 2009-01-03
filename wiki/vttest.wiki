@@ -14,6 +14,8 @@ VTTEST is a very useful application to demonstrate features of VT100 and related
  # Properly ignoring 132 column mode: `^[[?3h` and `^[[?3l`
  # Cusor Movement Test 3: (autowrap, scroll within a range of row) <img src=http://farm4.static.flickr.com/3088/3146153232_162a358b25_o.png width=640 />
  # Cusor Movement Test 4: (and backspace inside control code) <img src=http://farm4.static.flickr.com/3127/3146153280_295d4191fb_o.png width=640 />
+ # Cusor Movement Test 5: (I didn't do anything...) <img src=http://farm4.static.flickr.com/3266/3146153322_72864e2ac8_o.png width=640 />
+ # Screen Feature Test 1: (Autowrap mode switch test) <img src=http://farm4.static.flickr.com/3123/3158692193_1e0db6a740_o.png width=640 />
 
 = Details =
 
