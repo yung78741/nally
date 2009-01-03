@@ -17,6 +17,7 @@ VTTEST is a very useful application to demonstrate features of VT100 and related
  # Cusor Movement Test 5: (I didn't do anything...) <img src=http://farm4.static.flickr.com/3266/3146153322_72864e2ac8_o.png width=640 />
  # Screen Feature Test 1: (Autowrap mode switching) <img src=http://farm4.static.flickr.com/3123/3158692193_1e0db6a740_o.png width=640 />
  # Screen Feature Test 3: (Screen reverse mode switching) <img src=http://farm4.static.flickr.com/3077/3161961856_23095a0b13_o.png width=640 />
+ # Screen Feature Test 4: (Screen reverse mode switching) <img src=http://farm4.static.flickr.com/3110/3161961908_61744d421d_o.png width=640 />
 
 = Details =
 
