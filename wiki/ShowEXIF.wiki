@@ -1,0 +1,5 @@
+#summary Show EXIF function in Image Previewer
+
+= Screenshot =
+
+http://omploader.org/vMTNobQ/EXIF.png
