@@ -19,10 +19,10 @@ VTTEST is a very useful application to demonstrate features of VT100 and related
  # Screen Feature Test 1: (Autowrap mode switching) <img src=http://farm4.static.flickr.com/3123/3158692193_1e0db6a740_o.png width=640 />
  # Screen Feature Test 3: (Screen reverse mode switching) <img src=http://farm4.static.flickr.com/3077/3161961856_23095a0b13_o.png width=640 />
  # Screen Feature Test 4: (Screen reverse mode switching) <img src=http://farm4.static.flickr.com/3110/3161961908_61744d421d_o.png width=640 />
-# Screen Jump scroll down in row 12~13 <img src=http://farm4.static.flickr.com/3129/3162471803_865c1d6c4d_o.png width=640 />
-# Soft scroll down in row 12~13 <img src=http://farm4.static.flickr.com/3121/3162471759_cb5d1a75c2_o.png width=640 />
-# Soft scroll down in row 1~24 <img src=http://farm4.static.flickr.com/3095/3163304700_307f666a03_o.png width=640 />
-# Jump scroll down within row 1~24
+ # Screen Jump scroll down in row 12~13 <img src=http://farm4.static.flickr.com/3129/3162471803_865c1d6c4d_o.png width=640 />
+ # Soft scroll down in row 12~13 <img src=http://farm4.static.flickr.com/3121/3162471759_cb5d1a75c2_o.png width=640 />
+ # Soft scroll down in row 1~24 <img src=http://farm4.static.flickr.com/3095/3163304700_307f666a03_o.png width=640 />
+ # Jump scroll down within row 1~24 <img src=http://farm4.static.flickr.com/3132/3162471839_883bb55977_o.png width=640 />
 
 = Details =
 
