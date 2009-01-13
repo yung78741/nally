@@ -7,6 +7,8 @@ Continuing [http://code.google.com/p/nally/wiki/vttest previous page].
 = Implementations =
 
  # Implemented response upon terminal type query, however Nally only replies it's a VT102.
+ # VT102 Insert (character) mode, 80 columns <img src=http://farm2.static.flickr.com/1193/3170277256_8759f88a97_o.png width=640 />
+ # VT102 Delete character, 80 columns <img src=http://farm2.static.flickr.com/1010/3170277276_e87a49af85_o.png width=640 />
 
 = Details =
 
