@@ -24,9 +24,9 @@ VTTEST is a very useful application to demonstrate features of VT100 and related
  # Screen Feature Soft scroll down in row 1~24 <img src=http://farm4.static.flickr.com/3095/3163304700_307f666a03_o.png width=640 />
  # Screen Feature Jump scroll down within row 1~24 <img src=http://farm4.static.flickr.com/3132/3162471839_883bb55977_o.png width=640 />
  # Screen Feature Graphic Rendition test pattern, dark background <img src=http://farm4.static.flickr.com/3127/3163304808_9d528aba0b_o.png width=640 />
- # Screen Feature Graphic Rendition test pattern, light background <img src=http://farm4.static.flickr.com/3086/3163304928_25e33d921a_o.png width=650 />
- # Screen Feature Origin mode test: row 23~24 <img src=http://farm4.static.flickr.com/3119/3162523221_5e2f4eee1f_o.png width=650 />
- # Screen Feature Origin mode test: resetting <img src=http://farm4.static.flickr.com/3115/3162523257_c9a40bae7a_o.png width=650 />
+ # Screen Feature Graphic Rendition test pattern, light background <img src=http://farm4.static.flickr.com/3086/3163304928_25e33d921a_m.png width=500 />
+ # Screen Feature Origin mode test: row 23~24 <img src=http://farm4.static.flickr.com/3119/3162523221_5e2f4eee1f_m.png width=500 />
+ # Screen Feature Origin mode test: resetting <img src=http://farm4.static.flickr.com/3115/3162523257_c9a40bae7a_m.png width=500 />
 
 = Details =
 
