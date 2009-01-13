@@ -3,7 +3,7 @@
 
 = Introduction =
 
-VTTEST is a very useful application to demonstrate features of VT100 and related terminals. It can also be used to test the compatibility of terminal emulator.
+VTTEST is a very useful application to demonstrate features of VT100 and related terminals. It can also be used to test the compatibility of terminal emulator. See [http://code.google.com/p/nally/wiki/vttest2 Page 2 for more]
 
 = Implementations =
 
