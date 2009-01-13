@@ -2,12 +2,13 @@
 
 = Introduction =
 
-Add your content here.
+Continuing [http://code.google.com/p/nally/wiki/vttest previous page].
 
+= Implementations =
+
+ # Implemented response upon terminal type query, however Nally only replies it's a VT102.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+  * We are not interested in 132 column mode in Nally right now.
+  * Tabulation Stop has not yet been implemented in Nally.
