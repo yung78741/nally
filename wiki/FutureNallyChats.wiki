@@ -4,9 +4,11 @@
   * Plug-in architecture
   * Scriptable
   * UTF-8 support
-  * Fully vt100 support (autowrap, insert mode, blahblahblah)
+  * Get most of vt100/xterm support
   * Scrollback
-  * multiple geometry (132x24, perhaps full-screen) support, after vt100 task - mjhsieh
+  * 變更預設值: 字型，顏色等設定成更合理。
+  * 清理執行檔: header和nib沒清乾淨
+  * 更改透明背景繪製方式：目前的實做不能說錯，但是有點不合理。
 
 = Plug-Ins =
 == feature ==
@@ -25,6 +27,8 @@
   * 把 cell 的 storage 定義從 char 改成 unichar？
   * 沿用目前的 storage，只是 U+00FF 以下就只取 low byte 存進 char。U+0100以上就分別儲存在兩個 cell 中。目前的 doubleByte flag 仍可沿用。
 
-= vt100 =
-要支援 autowrap，必須將現在的資料結構改掉。改成儲存原始資料，以行分隔，等到 view 要存取時再重新 parse control code 對應到格子上？
-(mjhsieh: 倒也不必，當初 dec terminal 的輸出也沒有行的概念, 行是 parse/render 出來的沒錯)
+= vt100/xterm/terminal =
+ * g0/g1 ticket submitted
+ * xterm ticket would be submitted after I tried to work on ignoring window title sequence (我們要做 window title 改變嗎...)
+ * resizable geometry or geometric options and even full screen mode, also 長螢幕 support (alternative geometry negotiation seems to be part of telnet, but how can ssh did it?)
+ * perhaps need to throttle comm speed..... wait until I can find something similar in GNUterminal.app or vte library....
