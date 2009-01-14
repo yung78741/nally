@@ -1,0 +1,33 @@
+#summary Test for ncurse
+#labels Phase-Design
+
+= Introduction =
+
+Using ncurses-5.7/test, you can have a lot of feature test, our goal is to mimic xterm's behavior as possible.
+
+= Details =
+
+Some tests that passed
+  # env TERM=xterm-color ./background.dSYM
+  # env TERM=xterm-color ./color_set.dSYM
+  # env TERM=xterm-color ./dots.dSYM (be careful, this DoS your nally)
+  # env TERM=xterm-color ./dots_mvcur.dSYM (be careful, this DoS your nally)
+  # env TERM=xterm-color ./echochar.dSYM (be careful, this DoS your nally)
+  # env TERM=xterm-color ./firework.dSYM
+  # ./firstlast.dSYM
+  # env TERM=xterm-color ./hanoi.dSYM
+  # ./railroad.dSYM
+  # env TERM=xterm-color ./rain.dSYM
+  # env TERM=xterm-color ./redraw.dSYM
+  # env TERM=xterm-color ./tclock.dSYM
+  # env TERM=xterm-color ./testaddch.dSYM
+  # env TERM=xterm-color ./worm.dSYM
+  # env TERM=xterm-color ./xmas.dSYM
+
+Failed (g0/g1)
+  # cardfile
+  # gdc
+  # lrtest
+  # ncurses
+  # newdemo
+  # testcurs
