@@ -3,23 +3,6 @@
 
 = Introduction =
 
-During WWDC 2008, yllan and jjgod had a meetup，they also had some plans for future Nally. Combining with yllan's original thought as a starting point.
+Here goes the roadmap of Nally (under discussion)
 
 = Roadmap =
-
- * Nally
- # 變更預設值：字型，顏色等設定成更合理。
- # 清理執行檔：jjgod發的檔案有些header和nib沒清乾淨，是佔不了多少空間，這是一種潔癖。
- # 更改透明背景繪製方式：目前的實做不能說錯，但是有點不合理。
- # Plugin架構：如此一來，以後要加功能只要寫plugin即可。
-
- * Termi-Nally
- # 支援更多標準的terminal emulator。只是覺得這名字很可愛而已。
-
- * Nally Touch
- # 在iPhone上要瀏覽BBS是一大考驗。鍵盤尺寸太小（沒有full-size，ctrl-p怎麼按？）又太大（整個螢幕解析度只有480×320，叫鍵盤出來就佔掉一半了），輸入不方便，瀏覽也不方便。更重要的是：這賣不了錢啊！
-
-= Talks =
-
- * 如果要加 ssh 連線的話，還要多加一狗票選項（ssh 應該有很多 option 吧？好像還有 public key auth），界面就會變得更複雜。
- * 沒有完整的 vt100 emulation，更沒有 xterm
