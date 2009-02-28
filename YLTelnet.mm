@@ -264,6 +264,8 @@ void dump_packet(unsigned char *s, int length) {
             {
                 if (c == TELOPT_ECHO || c == TELOPT_SGA) 
                     [self sendCommand: DO option: c];
+                else if (c == TELOPT_BINARY)
+                    [self sendCommand: DO option: c];
                 else
                     [self sendCommand: DONT option: c];
                 
@@ -283,6 +285,8 @@ void dump_packet(unsigned char *s, int length) {
                     [self sendCommand: WILL option: TELOPT_NAWS];
                     [self performSelector: @selector(sendMessage:) withObject: [NSData dataWithBytes:b length:9] afterDelay: 0.001];
 //                  [self sendBytes: b length: 9];
+                } else if (c == TELOPT_BINARY) {
+                    [self sendCommand: WILL option: c];
                 } else 
                     [self sendCommand: WONT option: c];
                 _state = TOP_LEVEL;
