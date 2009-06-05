@@ -6,3 +6,10 @@
 Here goes the roadmap of Nally (under discussion)
 
 = Roadmap =
+
+= Release Note =
+ * 1.4.2
+ # SSH 到 BBS 時關閉 X11 Forwarding。
+ # 修正半型處理中引發的重繪問題。
+ # 正確處理地址欄輸入的地址。
+ # 其他終端相關的相容性改進。(see [vttest vttest])
