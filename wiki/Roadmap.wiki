@@ -6,7 +6,7 @@
 Here goes the roadmap of Nally (under discussion)
 
 = Roadmap =
- # EXIF - jjgod
+ # [ShowEXIF EXIF] - jjgod
 
 = Release Note =
  * 1.4.2
