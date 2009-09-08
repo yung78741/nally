@@ -1,10 +1,10 @@
 #summary Developer notes for packaging and making new Nally releases
 
-= Post-build =
+== Post-build ==
 
 We have a post-build script phase to cleanup resulting .app and making zh_{CN, TW} nibs.
 
-= Packaging =
+== Packaging ==
 
 First of all, update the changelog in Changelog.markdown, Changelog.zh_CN,markdown and Changelog.zh_TW.markdown for each language. They are in Markdown syntax.
 
@@ -19,5 +19,7 @@ PACK] Building Nally-1.4.5.zip...
 [PACK] Generating Nally.zh_TW.xml...
 Done! Please publish Nally-1.4.5.zip to http://nally.googlecode.com/files/Nally-1.4.5.zip.
 }}}
+
+== Release ==
 
 After that, first upload the zip file to google code Downloads section. Then you can do svn commit to update the appcast files (Nally.xml, Nally.zh_CN.xml, Nally.zh_TW.xml).
