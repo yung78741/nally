@@ -18,7 +18,7 @@
 "Quit" = "退出";
 
 /* Sheet Message */
-"There are %d tabs open in Nally. Do you want to quit anyway?" = "还有 %d 个标签正在连接中，您确定要退出 Welly？";
+"There are %d tabs open in Nally. Do you want to quit anyway?" = "还有 %d 个标签正在连接中，您确定要退出 Nally？";
 
 /* Sheet Message */
 "The connection is still alive. If you close this tab, the connection will be lost. Do you want to close this tab anyway?" = "此连接未断开。若您关闭这个标签会强制断开连接。您确定要关闭这个标签吗？";
