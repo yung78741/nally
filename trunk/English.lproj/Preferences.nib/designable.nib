@@ -10,9 +10,7 @@
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			<string key="NS.object.0">732</string>
 		</object>
-		<array class="NSMutableArray" key="IBDocument.EditedObjectIDs">
-			<integer value="1"/>
-		</array>
+		<array class="NSMutableArray" key="IBDocument.EditedObjectIDs"/>
 		<array key="IBDocument.PluginDependencies">
 			<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 		</array>
@@ -28,7 +26,7 @@
 				<string key="NSClassName">NSApplication</string>
 			</object>
 			<object class="NSCustomView" id="524402941">
-				<reference key="NSNextResponder"/>
+				<nil key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
 				<array class="NSMutableArray" key="NSSubviews">
 					<object class="NSButton" id="16462208">
@@ -313,7 +311,6 @@
 					</object>
 				</array>
 				<string key="NSFrameSize">{381, 333}</string>
-				<reference key="NSSuperview"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSCustomView" id="200271194">
@@ -1290,7 +1287,7 @@
 						<object class="NSButtonCell" key="NSCell" id="677192670">
 							<int key="NSCellFlags">-2080244224</int>
 							<int key="NSCellFlags2">0</int>
-							<string key="NSContents">Programatically Detect Double Byte</string>
+							<string key="NSContents">Programmatically Detect Double Byte</string>
 							<reference key="NSSupport" ref="961226193"/>
 							<reference key="NSControlView" ref="989531656"/>
 							<int key="NSButtonFlags">1211912703</int>
@@ -3309,6 +3306,7 @@
 				<string key="1.IBEditorWindowLastContentRect">{{0, 412}, {381, 333}}</string>
 				<string key="1.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="1.ImportedFromIB2"/>
+				<string key="11.IBEditorWindowLastContentRect">{{0, 373}, {454, 372}}</string>
 				<string key="11.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="11.ImportedFromIB2"/>
 				<string key="12.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3329,6 +3327,7 @@
 				<boolean value="YES" key="19.ImportedFromIB2"/>
 				<string key="2.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="2.ImportedFromIB2"/>
+				<string key="216.IBEditorWindowLastContentRect">{{21, 347}, {359, 375}}</string>
 				<string key="216.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="YES" key="216.ImportedFromIB2"/>
 				<string key="217.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
