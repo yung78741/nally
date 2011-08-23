@@ -685,7 +685,16 @@ BOOL isSpecialSymbol(unichar ch)
             {
                 [[YLImagePreviewer alloc] initWithURL: [NSURL URLWithString: url]];
             } else
-                [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: url]];
+            {
+                if ([e modifierFlags] & NSAlternateKeyMask)
+                    [[NSWorkspace sharedWorkspace] openURLs: [NSArray arrayWithObject:[NSURL URLWithString: url]]
+                                    withAppBundleIdentifier:nil
+                                                    options:NSWorkspaceLaunchWithoutActivation
+                             additionalEventParamDescriptor:nil
+                                          launchIdentifiers:nil];
+                else
+                    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: url]];
+            }
         }
     }
 }
